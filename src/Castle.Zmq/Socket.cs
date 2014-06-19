@@ -154,17 +154,10 @@
 
 		private void InternalSetOption(int option, int valueSize, IntPtr value, bool ignoreError)
 		{
-			// Do NOT check for disposed here
+			// DO NOT check whether it's disposed here
 
-			const int len = sizeof(int);
-
-			MarshalExt.AllocAndRun(size =>
-			{
-				Marshal.WriteInt32(size, valueSize);
-
-				var res = Native.Socket.zmq_setsockopt(this._socketPtr, option, value, size);
+			var res = Native.Socket.zmq_setsockopt(this._socketPtr, option, value, valueSize);
 				if (!ignoreError && res == Native.ErrorCode) Native.ThrowZmqError();
-			}, len);
 		}
 
 		private void TryCancelLinger()

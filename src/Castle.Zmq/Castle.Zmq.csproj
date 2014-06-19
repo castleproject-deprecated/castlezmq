@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context.cs" />
+    <Compile Include="Native\MarshalExt.cs" />
     <Compile Include="Native\Native.Socket.cs" />
     <Compile Include="Native\Native.Context.cs" />
     <Compile Include="IZmqContext.cs" />

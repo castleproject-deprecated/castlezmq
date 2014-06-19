@@ -8,8 +8,20 @@
 	{
 		internal static class Socket
 		{
-			// send operation must be tried again
+			#region Sending flags and ret codes
+
+			/// <summary> Block thread until message frame is sent </summary>
+			public const int WAIT = 0;
+			/// <summary> Queue message frame for sending (return immediately) </summary>
+			public const int DONTWAIT = 1;
+			/// <summary> More message frames will follow the current frame </summary>
+			public const int SNDMORE = 2;
+
+			// send operation must be tried again (may happen when sending with DONTWAIT)
 			public const int EAGAIN = 11;
+
+			#endregion
+
 
 			[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
 			public static extern IntPtr zmq_socket(IntPtr context, int socketType);
@@ -18,11 +30,10 @@
 			public static extern int zmq_close(IntPtr socketPtr);
 
 			[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
-			public static extern int zmq_setsockopt(IntPtr socket, int option, IntPtr value, IntPtr size);
+			public static extern int zmq_setsockopt(IntPtr socket, int option, IntPtr value, int size);
 
-
-			[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
-			public static extern int zmq_getsockopt(IntPtr socket, int option, IntPtr value, [Out] IntPtr size);
+//			[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
+//			public static extern int zmq_getsockopt(IntPtr socket, int option, IntPtr value, [Out] IntPtr size);
 
 			[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
 			public static extern int zmq_bind(IntPtr socket, [MarshalAs(UnmanagedType.LPStr)] string address);

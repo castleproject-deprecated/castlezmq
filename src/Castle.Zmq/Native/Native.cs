@@ -4,25 +4,6 @@
 	using System.Runtime.InteropServices;
 
 
-	internal static class MarshalExt
-	{
-
-		public static void AllocAndRun(Action<IntPtr> fn, int bufferLen)
-		{
-			var bufferPtr = Marshal.AllocHGlobal(bufferLen);
-			try
-			{
-				fn(bufferPtr);
-			}
-			finally
-			{
-				Marshal.FreeHGlobal(bufferPtr);
-			}
-		}
-
-	}
-
-
 	internal static partial class Native
 	{
 		#region Other stuff

@@ -31,16 +31,11 @@
 				throw new ZmqException("Could not allocate a Zmq Context");
 			}
 
-			if (ioThreads != DefaultIoThreads)
+			// Just in case to avoid memory leaks
+			if (ioThreads != DefaultIoThreads || maxSockets != DefaultMaxSockets)
 			{
-				var res = Native.Context.zmq_ctx_set(this.contextPtr, Native.Context.IO_THREADS, ioThreads);
-				if (res == Native.ErrorCode) Native.ThrowZmqError();
-			}
-			if (maxSockets != DefaultMaxSockets)
-			{
-				var res = Native.Context.zmq_ctx_set(this.contextPtr, Native.Context.MAX_SOCKETS, maxSockets);
-				if (res == Native.ErrorCode) Native.ThrowZmqError();
-			}
+				InternalConfigureContext(ioThreads, maxSockets);
+			} 
 		}
 
 		public Context() :this(DefaultIoThreads, DefaultMaxSockets)
@@ -60,6 +55,28 @@
 		public void Dispose()
 		{
 			this.InternalDispose(true);
+		}
+
+		private void InternalConfigureContext(int ioThreads, int maxSockets)
+		{
+			try
+			{
+				if (ioThreads != DefaultIoThreads)
+				{
+					var res = Native.Context.zmq_ctx_set(this.contextPtr, Native.Context.IO_THREADS, ioThreads);
+					if (res == Native.ErrorCode) Native.ThrowZmqError();
+				}
+				if (maxSockets != DefaultMaxSockets)
+				{
+					var res = Native.Context.zmq_ctx_set(this.contextPtr, Native.Context.MAX_SOCKETS, maxSockets);
+					if (res == Native.ErrorCode) Native.ThrowZmqError();
+				}
+			}
+			catch (Exception)
+			{
+				this.InternalDispose(true);
+				throw;
+			}
 		}
 
 		private void InternalDispose(bool isDispose)
