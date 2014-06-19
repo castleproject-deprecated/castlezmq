@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Zmq", "src\Castle.Zmq\Castle.Zmq.csproj", "{8A7E293C-909D-4DE9-A601-F4B817A1B419}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Zmq.Tests", "tests\Castle.Zmq.Tests\Castle.Zmq.Tests.csproj", "{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Zmq.StressTests", "tests\Castle.Zmq.StressTests\Castle.Zmq.StressTests.csproj", "{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8A7E293C-909D-4DE9-A601-F4B817A1B419}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A7E293C-909D-4DE9-A601-F4B817A1B419}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A7E293C-909D-4DE9-A601-F4B817A1B419}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A7E293C-909D-4DE9-A601-F4B817A1B419}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
