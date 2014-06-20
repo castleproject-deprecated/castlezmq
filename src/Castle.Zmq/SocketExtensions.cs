@@ -6,6 +6,11 @@
 
 	public static class SocketExtensions
 	{
+		public static bool HasMoreToRecv(this IZmqSocket source)
+		{
+			return source.GetOption<bool>(SocketOpt.RCVMORE);
+		}
+
 		public static byte[] Recv(this IZmqSocket source, RecvFlags flags)
 		{
 			return source.Recv((int) flags);
@@ -53,14 +58,17 @@
 		/// <param name="source"></param>
 		/// <param name="message"></param>
 		/// <param name="encoding">If not specified, defaults to UTF8</param>
-		public static void Send(this IZmqSocket source, string message, Encoding encoding = null)
+		/// <param name="hasMoreToSend"></param>
+		/// <param name="noWait"></param>
+		public static void Send(this IZmqSocket source, string message, Encoding encoding = null, 
+								bool hasMoreToSend = false, bool noWait = false)
 		{
 			if (message == null) throw new ArgumentNullException("message");
 
 			encoding = encoding ?? Encoding.UTF8;
 			var buffer = encoding.GetBytes(message);
 
-			source.Send(buffer);
+			source.Send(buffer, hasMoreToSend, noWait);
 		}
 
 		public static T GetOption<T>(this IZmqSocket source, SocketOpt option)
@@ -117,14 +125,30 @@
 			}, len);
 		}
 
-		public static void SubscribeAll(this IZmqSocket source, string[] topics)
+		public static void SubscribeAll(this IZmqSocket source)
 		{
-			throw new NotImplementedException();
+			source.Subscribe("");
 		}
 
-		public static void UnsubscribeAll(this IZmqSocket source, string[] topics)
+		public static void UnsubscribeAll(this IZmqSocket source)
 		{
-			throw new NotImplementedException();
+			source.Unsubscribe("");
+		}
+
+		public static void Subscribe(this IZmqSocket source, string[] topics)
+		{
+			foreach (var topic in topics)
+			{
+				source.Subscribe(topic);
+			}
+		}
+
+		public static void Unsubscribe(this IZmqSocket source, string[] topics)
+		{
+			foreach (var topic in topics)
+			{
+				source.Unsubscribe(topic);
+			}
 		}
 	}
 }
