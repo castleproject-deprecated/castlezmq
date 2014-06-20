@@ -51,6 +51,8 @@
 			InternalDispose(false);
 		}
 
+		internal IntPtr SocketPtr { get { return _socketPtr; } }
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -126,7 +128,6 @@
 //
 //			return null;
 //		}
-
 
 		public byte[] Recv(int flags = 0)
 		{

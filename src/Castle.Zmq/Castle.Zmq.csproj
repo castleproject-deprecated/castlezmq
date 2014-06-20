@@ -46,11 +46,14 @@
     <Compile Include="MsgFrame.cs" />
     <Compile Include="Native\Native.MsgFrame.cs" />
     <Compile Include="Native\MarshalExt.cs" />
+    <Compile Include="Native\Native.Poll.cs" />
     <Compile Include="Native\Native.Socket.cs" />
     <Compile Include="Native\Native.Context.cs" />
     <Compile Include="IZmqContext.cs" />
     <Compile Include="IZmqSocket.cs" />
     <Compile Include="Native\Native.cs" />
+    <Compile Include="Polling.cs" />
+    <Compile Include="Polling.PollItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Socket.cs" />
     <Compile Include="Enums.cs" />
