@@ -11,6 +11,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Zmq.Rpc", "src\Castl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{34F7015D-71B2-454E-A7B0-D7A4D3FB2702}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2A360D1B-C0AD-4D66-8945-0D47DBC71069}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiTest", "tests\ApiTest\ApiTest.csproj", "{2AD734AC-7981-40E2-8678-D923CBAF9F56}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +42,10 @@ Global
 		{8585F472-0039-4F9A-A57D-63BB6CDF97C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8585F472-0039-4F9A-A57D-63BB6CDF97C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8585F472-0039-4F9A-A57D-63BB6CDF97C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AD734AC-7981-40E2-8678-D923CBAF9F56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AD734AC-7981-40E2-8678-D923CBAF9F56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AD734AC-7981-40E2-8678-D923CBAF9F56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AD734AC-7981-40E2-8678-D923CBAF9F56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
