@@ -24,7 +24,11 @@
 			public struct zmq_pollitem_t
 			{
 				public IntPtr socket;
-				public long fd; // for x86 it's an int
+#if x64 
+				public long fd; 
+#else
+				public int fd; 
+#endif
  				public Int16 events;
 				public Int16 revents;
 			}
