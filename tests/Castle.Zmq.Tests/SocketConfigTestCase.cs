@@ -6,17 +6,28 @@
     public class SocketConfigTestCase : BaseContextSetUp
     {
 		[Test]
-		public void set_int32_sockoption()
+		public void set_int32_sockoption_SockType()
 		{
 			using (var socket = new Socket(base.Context, SocketType.Req))
 			{
-				socket.SetOption(SocketOpt.LINGER, 0);
+				var val = socket.GetOption<int>(SocketOpt.TYPE);
 
-				var val = socket.GetOption<int>(SocketOpt.LINGER);
-
-				Assert.AreEqual(0, val);
+				Assert.AreEqual((int)SocketType.Req, val);
 			}
 		}
 
+
+		[Test]
+		public void set_int32_sockoption_rcvtimeout()
+		{
+			using (var socket = new Socket(base.Context, SocketType.Req))
+			{
+				socket.SetOption(SocketOpt.RCVTIMEO, 1000);
+
+				var val = socket.GetOption<int>(SocketOpt.RCVTIMEO);
+
+				Assert.AreEqual(1000, val);
+			}
+		}
     }
 }
