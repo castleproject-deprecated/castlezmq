@@ -5,8 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Zmq", "src\Castle.Zm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Zmq.Tests", "tests\Castle.Zmq.Tests\Castle.Zmq.Tests.csproj", "{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Zmq.StressTests", "tests\Castle.Zmq.StressTests\Castle.Zmq.StressTests.csproj", "{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Castle.Zmq.Rpc", "src\Castle.Zmq.Rpc\Castle.Zmq.Rpc.csproj", "{8585F472-0039-4F9A-A57D-63BB6CDF97C4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{34F7015D-71B2-454E-A7B0-D7A4D3FB2702}"
@@ -18,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2A360D
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiTest", "tests\ApiTest\ApiTest.csproj", "{2AD734AC-7981-40E2-8678-D923CBAF9F56}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StressTest1", "tests\ApiTest\StressTest1.csproj", "{2AD734AC-7981-40E2-8678-D923CBAF9F56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +32,6 @@ Global
 		{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2ECE74BA-A660-42C6-9AD7-57A65950ECAE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8585F472-0039-4F9A-A57D-63BB6CDF97C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8585F472-0039-4F9A-A57D-63BB6CDF97C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8585F472-0039-4F9A-A57D-63BB6CDF97C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -51,7 +45,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{2ECE74BA-A660-42C6-9AD7-57A65950ECAE} = {34F7015D-71B2-454E-A7B0-D7A4D3FB2702}
 		{5725D0E3-9AEA-4FF0-AC81-4F0479A24A7F} = {34F7015D-71B2-454E-A7B0-D7A4D3FB2702}
+		{2AD734AC-7981-40E2-8678-D923CBAF9F56} = {34F7015D-71B2-454E-A7B0-D7A4D3FB2702}
 	EndGlobalSection
 EndGlobal

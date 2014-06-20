@@ -6,6 +6,53 @@
 
 	public static class SocketExtensions
 	{
+		public static byte[] Recv(this IZmqSocket source, RecvFlags flags)
+		{
+			return source.Recv((int) flags);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="source"></param>
+		/// <param name="encoding">If not specified, defaults to UTF8</param>
+		/// <returns></returns>
+		public static string RecvString(this IZmqSocket source, Encoding encoding = null)
+		{
+			return RecvString(source, RecvFlags.None, encoding);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="source"></param>
+		/// <param name="flags"></param>
+		/// <param name="encoding">If not specified, defaults to UTF8</param>
+		/// <returns></returns>
+		public static string RecvString(this IZmqSocket source, RecvFlags flags, Encoding encoding = null)
+		{
+			var buffer = Recv(source, flags);
+			if (buffer == null) return null;
+
+			encoding = encoding ?? Encoding.UTF8;
+
+			return encoding.GetString(buffer);
+		}
+
+		public static void Send(this IZmqSocket source, byte[] message, SendFlags flags)
+		{
+			bool hasMore = (flags & SendFlags.SendMore) != 0;
+			bool doNotWait = (flags & SendFlags.DoNotWait) != 0;
+
+			source.Send(message, hasMore, doNotWait);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="source"></param>
+		/// <param name="message"></param>
+		/// <param name="encoding">If not specified, defaults to UTF8</param>
 		public static void Send(this IZmqSocket source, string message, Encoding encoding = null)
 		{
 			if (message == null) throw new ArgumentNullException("message");

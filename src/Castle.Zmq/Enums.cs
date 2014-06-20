@@ -1,5 +1,39 @@
 ﻿namespace Castle.Zmq
 {
+	using System;
+
+	[Flags]
+	public enum RecvFlags
+	{
+		None = 0,
+		/// <summary>
+		/// Recv immediately - if the socket cant receive
+		/// immediately, it will return EAGAIN, which we 
+		/// translate to return null
+		/// </summary>
+		DoNotWait = Native.Socket.DONTWAIT
+	}
+
+	[Flags]
+	public enum SendFlags
+	{
+		None = Wait,
+		/// <summary>
+		/// Waits for the socket to be in the correct state to send (that's the default behavior)
+		/// </summary>
+		Wait = Native.Socket.WAIT,
+		/// <summary>
+		/// Sends immediately - if the socket cant send immediately, it will return EAGAIN
+		/// which we translate into an exception 
+		/// </summary>
+		DoNotWait = Native.Socket.DONTWAIT,
+		/// <summary>
+		/// Indicates that this is not the last frame, there's more coming. the last message
+		/// should NOT have this flag
+		/// </summary>
+		SendMore = Native.Socket.SNDMORE
+	}
+
 	public enum SocketType
 	{
 		Pub = 1,

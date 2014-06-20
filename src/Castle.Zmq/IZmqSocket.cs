@@ -2,6 +2,8 @@
 {
 	using System;
 
+	
+
 	/// <summary>
 	/// This is only exposed to aid libraries in 
 	/// stubing the real implementations
@@ -13,7 +15,7 @@
 		void Connect(string endpoint);
 		void Disconnect(string endpoint);
 
-		byte[] Recv();
+		byte[] Recv(int flags = 0);
 
 		void Send(byte[] buffer, bool hasMoreToSend = false, bool noWait = false);
 

@@ -3,13 +3,15 @@
 	using System;
 	using System.Runtime.InteropServices;
 	using System.Runtime.Remoting.Services;
+	using System.Text;
 
 
 	public class Socket : IZmqSocket, IDisposable
 	{
 		private readonly SocketType _type;
-		private IntPtr _socketPtr;
 		private volatile bool _disposed;
+
+		private IntPtr _socketPtr;
 
 		public const int NoTimeout = 0;
 
@@ -73,57 +75,8 @@
 			EnsureNotDisposed();
 
 			var retT = typeof(T);
-			Func<IntPtr, Int64, object> unmarshaller = null;
-			Int64 bufferLen = 0L;
 
-			if (retT == typeof(Int32))
-			{
-				unmarshaller = (ptr, len) => Marshal.ReadInt32(ptr);
-				bufferLen = sizeof(Int32);
-			}
-			else if (retT == typeof(Int64))
-			{
-				unmarshaller = (ptr, len) => Marshal.ReadInt64(ptr);
-				bufferLen = sizeof(Int64);
-			}
-			else if (retT == typeof(bool))
-			{
-				unmarshaller = (ptr, len) => Marshal.ReadInt32(ptr) != 0;
-				bufferLen = sizeof(Int32);
-			}
-			else if (retT == typeof(byte[]))
-			{
-				unmarshaller = (ptr, len) =>
-				{
-					var buffer = new byte[len];
-					if (len > 0)
-						Marshal.Copy(ptr, buffer, 0, (int) len);
-					return buffer;
-				};
-				bufferLen = 255L;
-			}
-			else
-			{
-				throw new ArgumentException("Unsupported option type: " + retT.Name);
-			}
-
-			object retType = null;
-
-			MarshalExt.AllocAndRun(sizePtr =>
-			{
-				Marshal.WriteInt64(sizePtr, bufferLen);
-				
-				MarshalExt.AllocAndRun(bufferPtr =>
-				{
-					var res = Native.Socket.zmq_getsockopt(this._socketPtr, option, bufferPtr, sizePtr);
-					if (res == Native.ErrorCode) Native.ThrowZmqError();
-
-					retType = unmarshaller(bufferPtr, bufferLen);
-				}, bufferLen);
-
-			}, sizeof(Int64));
-
-			return (T) retType;
+			return (T) this.InternalGetOption(retT, option);
 		}
 
 		public void Bind(string endpoint)
@@ -175,11 +128,9 @@
 //		}
 
 
-		public byte[] Recv()
+		public byte[] Recv(int flags = 0)
 		{
 			EnsureNotDisposed();
-
-			var flags = 0;
 
 			using (var frame = new MsgFrame())
 			{
@@ -209,26 +160,49 @@
 			if (buffer == null) throw new ArgumentNullException("buffer");
 			EnsureNotDisposed();
 
-			// TODO: wait | no_wait support
 			var flags = hasMoreToSend ? Native.Socket.SNDMORE : 0;
+			flags += noWait ? Native.Socket.DONTWAIT : 0; 
 
 			var len = buffer.Length;
 
 			var res = Native.Socket.zmq_send(this._socketPtr, buffer, len, flags);
+
 			// for now we're treating EAGAIN as error. 
-			// not sure that's OK, but since you can't pass the NOWAIT flag no harm (?)
+			// not sure that's OK
 			if (res == Native.ErrorCode) Native.ThrowZmqError();
 		}
 
+		/// <summary>
+		/// The SUBSCRIBE option shall establish a new message filter on a ZMQ_SUB socket. 
+		/// Newly created ZMQ_SUB sockets shall filter out all incoming messages, therefore 
+		/// you should call this option to establish an initial message filter.
+		/// </summary>
+		/// <param name="topic">topic name</param>
 		public void Subscribe(string topic)
 		{
-			EnsureNotDisposed();
-			
-		}
-		public void Unsubscribe(string topic)
-		{
+			if (topic == null) throw new ArgumentNullException("topic");
+			// should we assert socketType = ZMQ_SUB ?
 			EnsureNotDisposed();
 
+			var buf = Encoding.UTF8.GetBytes(topic);
+			SocketExtensions.SetOption(this, SocketOpt.SUBSCRIBE, buf);
+		}
+
+		/// <summary>
+		/// The ZMQ_UNSUBSCRIBE option shall remove an existing message filter on a ZMQ_SUB socket. 
+		/// The filter specified must match an existing filter previously established with the 
+		/// ZMQ_SUBSCRIBE option. If the socket has several instances of the same filter attached 
+		/// the ZMQ_UNSUBSCRIBE option shall remove only one instance, leaving the rest in place and functional.
+		/// </summary>
+		/// <param name="topic">topic name</param>
+		public void Unsubscribe(string topic)
+		{
+			if (topic == null) throw new ArgumentNullException("topic");
+			// should we assert socketType = ZMQ_SUB ?
+			EnsureNotDisposed();
+
+			var buf = Encoding.UTF8.GetBytes(topic);
+			SocketExtensions.SetOption(this, SocketOpt.UNSUBSCRIBE, buf);
 		}
 
 		public void Dispose()
@@ -268,6 +242,77 @@
 
 			var res = Native.Socket.zmq_setsockopt(this._socketPtr, option, value, valueSize);
 			if (!ignoreError && res == Native.ErrorCode) Native.ThrowZmqError();
+		}
+
+		private object InternalGetOption(Type retType, int option)
+		{
+			Func<IntPtr, Int64, object> unmarshaller;
+			Int64 bufferLen;
+
+			BuildUnmarshaller(retType, out unmarshaller, out bufferLen);
+
+			object retValue = null;
+
+			MarshalExt.AllocAndRun(sizePtr =>
+			{
+				Marshal.WriteInt64(sizePtr, bufferLen);
+
+				MarshalExt.AllocAndRun(bufferPtr =>
+				{
+					var res = Native.Socket.zmq_getsockopt(this._socketPtr, option, bufferPtr, sizePtr);
+					if (res == Native.ErrorCode) Native.ThrowZmqError();
+
+					retValue = unmarshaller(bufferPtr, bufferLen);
+				}, bufferLen);
+
+			}, sizeof(Int64));
+
+			return retValue;
+		}
+
+		private void BuildUnmarshaller(Type retType, out Func<IntPtr, long, object> unmarshaller, out long bufferLen)
+		{
+			if (retType == typeof(Int32))
+			{
+				unmarshaller = (ptr, len) => Marshal.ReadInt32(ptr);
+				bufferLen = sizeof(Int32);
+			}
+			else if (retType == typeof(Int64))
+			{
+				unmarshaller = (ptr, len) => Marshal.ReadInt64(ptr);
+				bufferLen = sizeof(Int64);
+			}
+			else if (retType == typeof(bool))
+			{
+				unmarshaller = (ptr, len) => Marshal.ReadInt32(ptr) != 0;
+				bufferLen = sizeof(Int32);
+			}
+			else if (retType == typeof(byte[]))
+			{
+				unmarshaller = (ptr, len) =>
+				{
+					var buffer = new byte[len];
+					if (len > 0)
+						Marshal.Copy(ptr, buffer, 0, (int)len);
+					return buffer;
+				};
+				bufferLen = 255L;
+			}
+			else if (retType == typeof(string))
+			{
+				unmarshaller = (ptr, len) =>
+				{
+					var buffer = new byte[len];
+					if (len > 0)
+						Marshal.Copy(ptr, buffer, 0, (int)len);
+					return Encoding.UTF8.GetString(buffer);
+				};
+				bufferLen = 255L;
+			}
+			else
+			{
+				throw new ArgumentException("Unsupported option type: " + retType.Name);
+			}
 		}
 
 		private void TryCancelLinger()
