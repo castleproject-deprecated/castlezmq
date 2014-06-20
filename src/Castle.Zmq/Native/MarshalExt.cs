@@ -24,5 +24,9 @@
 			}
 		}
 
+		public static void AllocAndRun(Action<IntPtr> fn, long bufferLen)
+		{
+			AllocAndRun(fn, Convert.ToInt32(bufferLen));
+		}
 	}
 }
