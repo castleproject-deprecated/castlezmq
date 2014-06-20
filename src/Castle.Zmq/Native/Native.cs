@@ -14,8 +14,8 @@
 		[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr zmq_strerror(int errno);
 
-//		  [DllImport("libzmq",CallingConvention = CallingConvention.Cdecl)]
-//  extern void zmq_version([Out] int& major,[Out] int& minor,[Out] int& patch)
+//		[DllImport("libzmq",CallingConvention = CallingConvention.Cdecl)]
+//		extern void zmq_version([Out] int& major,[Out] int& minor,[Out] int& patch)
 
 		#endregion
 

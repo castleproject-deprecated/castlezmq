@@ -32,7 +32,7 @@
 			public static extern int zmq_setsockopt(IntPtr socket, int option, IntPtr value, int size);
 
 			[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
-			public static extern int zmq_getsockopt(IntPtr socket, int option, IntPtr value, [Out] IntPtr size);
+			public static extern int zmq_getsockopt(IntPtr socket, int option, IntPtr value, IntPtr size);
 
 			[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
 			public static extern int zmq_bind(IntPtr socket, [MarshalAs(UnmanagedType.LPStr)] string address);
