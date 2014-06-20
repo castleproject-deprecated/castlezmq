@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Runtime.InteropServices;
+	using System.Runtime.Remoting.Services;
 
 
 	public class Socket : IZmqSocket, IDisposable
@@ -67,6 +68,62 @@
 			InternalSetOption(option, valueSize, value, ignoreError: false);
 		}
 
+		public T GetOption<T>(int option)
+		{
+			EnsureNotDisposed();
+
+			var retT = typeof(T);
+			var size = 0;
+			Func<IntPtr, int, object> unmarshaller = null;
+
+			if (retT == typeof(int))
+			{
+				unmarshaller = (ptr, len) => Marshal.ReadInt32(ptr);
+				size = sizeof (int);
+			}
+			else if (retT == typeof(bool))
+			{
+				unmarshaller = (ptr, len) => Marshal.ReadInt32(ptr) != 0;
+				size = sizeof(int);
+			}
+			else if (retT == typeof(byte[]))
+			{
+				unmarshaller = (ptr, len) =>
+				{
+					var buffer = new byte[len];
+					Marshal.Copy(ptr, buffer, 0, len);
+					return buffer;
+				};
+				size = 255;
+			}
+			else
+			{
+				throw new ArgumentException("Unsupported option type: " + retT.Name);
+			}
+
+			object retType = null;
+			
+			MarshalExt.AllocAndRun(bufferPtr =>
+			{
+				var bufferSize = 0;
+				var handle = GCHandle.Alloc(bufferSize, GCHandleType.Pinned);
+
+				try
+				{
+					var res = Native.Socket.zmq_getsockopt(this._socketPtr, option, bufferPtr, GCHandle.ToIntPtr(handle));
+					if (res == Native.ErrorCode) Native.ThrowZmqError();
+
+					retType = unmarshaller(bufferPtr, bufferSize);
+				}
+				finally
+				{
+					handle.Free();
+				}
+			}, size);
+
+			return (T) retType;
+		}
+
 		public void Bind(string endpoint)
 		{
 			if (string.IsNullOrEmpty(endpoint)) throw new ArgumentNullException("endpoint");
@@ -103,15 +160,61 @@
 			if (res == Native.ErrorCode) Native.ThrowZmqError();
 		}
 
+//		public int RecvInto(byte[] buffer, int flags)
+//		{
+//			// this one should use zmq_recv
+//		}
+
+//		public byte[] RecvAll()
+//		{
+//			EnsureNotDisposed();
+//
+//			return null;
+//		}
+
+
 		public byte[] Recv()
 		{
 			EnsureNotDisposed();
+
+			var flags = 0;
+
+			using (var frame = new MsgFrame())
+			{
+				var res = Native.MsgFrame.zmq_msg_recv(frame._msgPtr, this._socketPtr, flags);
+
+				if (res == Native.ErrorCode)
+				{
+					var error = Native.LastError();
+					if (error == Native.Socket.EAGAIN)
+					{
+						// not the end of the world
+						return null;
+					}
+					Native.ThrowZmqError(error);
+				}
+				else
+				{
+					return frame.ToBytes();
+				}
+			}
+
 			return null;
 		}
 
 		public void Send(byte[] buffer, bool hasMoreToSend = false)
 		{
+			if (buffer == null) throw new ArgumentNullException("buffer");
 			EnsureNotDisposed();
+
+			// TODO: wait | no_wait support
+			var flags = hasMoreToSend ? Native.Socket.SNDMORE : 0;
+			var len = buffer.Length;
+
+			var res = Native.Socket.zmq_send(this._socketPtr, buffer, len, flags);
+			// for now we're treating EAGAIN as error. 
+			// not sure that's OK, but since you can't pass the NOWAIT flag no harm (?)
+			if (res == Native.ErrorCode) Native.ThrowZmqError();
 		}
 
 		public void Subscribe(string topic)
@@ -144,7 +247,10 @@
 			TryCancelLinger();
 
 			var res = Native.Socket.zmq_close(this._socketPtr);
-			if (res == Native.ErrorCode) Native.ThrowZmqError();
+			if (res == Native.ErrorCode)
+			{
+				// we cannot throw in dispose. should we log?
+			}
 		}
 
 		private void EnsureNotDisposed()

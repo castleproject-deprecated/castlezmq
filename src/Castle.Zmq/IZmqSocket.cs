@@ -6,7 +6,7 @@
 	/// This is only exposed to aid libraries in 
 	/// stubing the real implementations
 	/// </summary>
-	public interface IZmqSocket
+	public interface IZmqSocket : IDisposable
 	{
 		void Bind(string endpoint);
 		void Unbind(string endpoint);
@@ -22,5 +22,6 @@
 		void Unsubscribe(string topic);
 
 		void SetOption(int option, IntPtr value, int valueSize);
+		T GetOption<T>(int option);
 	}
 }

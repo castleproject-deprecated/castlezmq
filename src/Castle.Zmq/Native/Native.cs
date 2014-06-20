@@ -21,12 +21,23 @@
 
 		public const int ErrorCode = -1;
 
+		public static int LastError()
+		{
+			var error = Native.zmq_errno();
+			return error;
+		}
+
 		/// <summary>
 		/// Should be called when a native zmq function returns error (-1)
 		/// </summary>
 		public static void ThrowZmqError()
 		{
 			var error = Native.zmq_errno();
+			ThrowZmqError(error);
+		}
+
+		public static void ThrowZmqError(int error)
+		{
 			var errormsgptr = zmq_strerror(error);
 			if (errormsgptr != IntPtr.Zero)
 			{

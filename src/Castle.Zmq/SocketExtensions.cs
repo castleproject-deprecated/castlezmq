@@ -6,6 +6,21 @@
 
 	public static class SocketExtensions
 	{
+		public static void Send(this IZmqSocket source, string message, Encoding encoding = null)
+		{
+			if (message == null) throw new ArgumentNullException("message");
+
+			encoding = encoding ?? Encoding.UTF8;
+			var buffer = encoding.GetBytes(message);
+
+			source.Send(buffer);
+		}
+
+		public static T GetOption<T>(this IZmqSocket source, SocketOpt option)
+		{
+			return source.GetOption<T>((int) option);
+		}
+
 		public static void SetOption(this IZmqSocket source, SocketOpt option, bool value)
 		{
 			SetOption(source, option, value ? 1 : 0);

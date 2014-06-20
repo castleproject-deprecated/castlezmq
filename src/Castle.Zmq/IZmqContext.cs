@@ -1,6 +1,8 @@
 ﻿namespace Castle.Zmq
 {
-	public interface IZmqContext
+	using System;
+
+	public interface IZmqContext : IDisposable
 	{
 		IZmqSocket CreateSocket(SocketType type);
 	}
