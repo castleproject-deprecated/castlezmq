@@ -98,6 +98,7 @@
 				if (error == Native.ErrorCode)
 				{
 					// Not good, but we can't throw an exception in the Dispose - should we log it?
+					System.Diagnostics.Debug.WriteLine("Error disposing context " + Native.LastError());
 				}
 
 				this.contextPtr = IntPtr.Zero;

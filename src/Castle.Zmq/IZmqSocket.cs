@@ -15,7 +15,7 @@
 
 		byte[] Recv();
 
-		void Send(byte[] buffer, bool hasMoreToSend = false);
+		void Send(byte[] buffer, bool hasMoreToSend = false, bool noWait = false);
 
 		void Subscribe(string topic);
 

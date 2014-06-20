@@ -73,28 +73,34 @@
 			EnsureNotDisposed();
 
 			var retT = typeof(T);
-			var size = 0;
-			Func<IntPtr, int, object> unmarshaller = null;
+			Func<IntPtr, Int64, object> unmarshaller = null;
+			Int64 bufferLen = 0L;
 
-			if (retT == typeof(int))
+			if (retT == typeof(Int32))
 			{
 				unmarshaller = (ptr, len) => Marshal.ReadInt32(ptr);
-				size = sizeof (int);
+				bufferLen = sizeof(Int32);
+			}
+			else if (retT == typeof(Int64))
+			{
+				unmarshaller = (ptr, len) => Marshal.ReadInt64(ptr);
+				bufferLen = sizeof(Int64);
 			}
 			else if (retT == typeof(bool))
 			{
 				unmarshaller = (ptr, len) => Marshal.ReadInt32(ptr) != 0;
-				size = sizeof(int);
+				bufferLen = sizeof(Int32);
 			}
 			else if (retT == typeof(byte[]))
 			{
 				unmarshaller = (ptr, len) =>
 				{
 					var buffer = new byte[len];
-					Marshal.Copy(ptr, buffer, 0, len);
+					if (len > 0)
+						Marshal.Copy(ptr, buffer, 0, (int) len);
 					return buffer;
 				};
-				size = 255;
+				bufferLen = 255L;
 			}
 			else
 			{
@@ -102,24 +108,20 @@
 			}
 
 			object retType = null;
-			
-			MarshalExt.AllocAndRun(bufferPtr =>
-			{
-				var bufferSize = 0;
-				var handle = GCHandle.Alloc(bufferSize, GCHandleType.Pinned);
 
-				try
+			MarshalExt.AllocAndRun(sizePtr =>
+			{
+				Marshal.WriteInt64(sizePtr, bufferLen);
+				
+				MarshalExt.AllocAndRun(bufferPtr =>
 				{
-					var res = Native.Socket.zmq_getsockopt(this._socketPtr, option, bufferPtr, GCHandle.ToIntPtr(handle));
+					var res = Native.Socket.zmq_getsockopt(this._socketPtr, option, bufferPtr, sizePtr);
 					if (res == Native.ErrorCode) Native.ThrowZmqError();
 
-					retType = unmarshaller(bufferPtr, bufferSize);
-				}
-				finally
-				{
-					handle.Free();
-				}
-			}, size);
+					retType = unmarshaller(bufferPtr, bufferLen);
+				}, bufferLen);
+
+			}, sizeof(Int64));
 
 			return (T) retType;
 		}
@@ -202,13 +204,14 @@
 			return null;
 		}
 
-		public void Send(byte[] buffer, bool hasMoreToSend = false)
+		public void Send(byte[] buffer, bool hasMoreToSend = false, bool noWait = false)
 		{
 			if (buffer == null) throw new ArgumentNullException("buffer");
 			EnsureNotDisposed();
 
 			// TODO: wait | no_wait support
 			var flags = hasMoreToSend ? Native.Socket.SNDMORE : 0;
+
 			var len = buffer.Length;
 
 			var res = Native.Socket.zmq_send(this._socketPtr, buffer, len, flags);
@@ -250,6 +253,7 @@
 			if (res == Native.ErrorCode)
 			{
 				// we cannot throw in dispose. should we log?
+				System.Diagnostics.Debug.WriteLine("Error disposing socket " + Native.LastError());
 			}
 		}
 
@@ -263,7 +267,7 @@
 			// DO NOT check whether it's disposed here
 
 			var res = Native.Socket.zmq_setsockopt(this._socketPtr, option, value, valueSize);
-				if (!ignoreError && res == Native.ErrorCode) Native.ThrowZmqError();
+			if (!ignoreError && res == Native.ErrorCode) Native.ThrowZmqError();
 		}
 
 		private void TryCancelLinger()

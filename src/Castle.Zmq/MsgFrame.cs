@@ -8,7 +8,7 @@
 	/// </summary>
 	internal class MsgFrame : IDisposable
 	{
-		private const int zmq_msg_t_size = 32;
+		private const int zmq_msg_t_size = 48;
 		internal IntPtr _msgPtr;
 
 		public MsgFrame()
