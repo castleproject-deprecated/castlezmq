@@ -50,7 +50,7 @@
 						pubSocket.Send("t3", hasMoreToSend: true);
 						pubSocket.Send("For standard sockets, this flag is passed through zmq_poll() to the underlying poll() system call and generally means that some sort of error condition is present on the socket specified by fd. For ØMQ sockets this flag has no effect if set in events, and shall never be returned in revents by zmq_poll().");
 
-						Thread.Sleep(10);
+						Thread.Sleep(1);
 					}
 				});
 

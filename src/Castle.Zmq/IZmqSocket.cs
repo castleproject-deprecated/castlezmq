@@ -10,6 +10,8 @@
 	/// </summary>
 	public interface IZmqSocket : IDisposable
 	{
+		SocketType SocketType { get; }
+
 		void Bind(string endpoint);
 		void Unbind(string endpoint);
 		void Connect(string endpoint);

@@ -53,6 +53,12 @@
 
 		internal IntPtr SocketPtr { get { return _socketPtr; } }
 
+		public SocketType SocketType
+		{
+			// not sure this is the best way, since they MAY change
+			get { return this._type; }
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -116,18 +122,6 @@
 			var res = Native.Socket.zmq_disconnect(this._socketPtr, endpoint);
 			if (res == Native.ErrorCode) Native.ThrowZmqError();
 		}
-
-//		public int RecvInto(byte[] buffer, int flags)
-//		{
-//			// this one should use zmq_recv
-//		}
-
-//		public byte[] RecvAll()
-//		{
-//			EnsureNotDisposed();
-//
-//			return null;
-//		}
 
 		public byte[] Recv(int flags = 0)
 		{

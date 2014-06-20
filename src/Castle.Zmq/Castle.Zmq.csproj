@@ -62,6 +62,8 @@
   <ItemGroup>
     <Compile Include="Context.cs" />
     <Compile Include="Extensions\Device.cs" />
+    <Compile Include="Extensions\Forwarder.cs" />
+    <Compile Include="Extensions\SharedQueue.cs" />
     <Compile Include="Extensions\WorkerPool.cs" />
     <Compile Include="MsgFrame.cs" />
     <Compile Include="Native\Native.MsgFrame.cs" />
