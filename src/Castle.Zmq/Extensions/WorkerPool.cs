@@ -14,10 +14,10 @@ namespace Castle.Zmq.Extensions
 		public WorkerPool(Context ctx, string frontEndEndpoint, string backendEndpoint, Action<IZmqSocket> proc, int workers)
 			: base(ctx, frontEndEndpoint, backendEndpoint)
 		{
-			_ctx = ctx;
-			_backendEndpoint = backendEndpoint;
-			_proc = proc;
-			_workers = workers;
+			this._ctx = ctx;
+			this._backendEndpoint = backendEndpoint;
+			this._proc = proc;
+			this._workers = workers;
 		}
 
 		public override void Start()
@@ -36,19 +36,26 @@ namespace Castle.Zmq.Extensions
 
 		private void WorkerProc(object state)
 		{
-			using (var socket = this._ctx.CreateSocket(SocketType.Rep))
+			try
 			{
-				socket.Connect(_backendEndpoint);
-
-				var polling = new Polling(PollingEvents.RecvReady, socket);
-				
-				// once data is ready, we pass it along to the actual worker
-				polling.RecvReady += _dummy => this._proc(socket);
-
-				while (_running)
+				using (var socket = this._ctx.CreateSocket(SocketType.Rep))
 				{
-					polling.PollForever(); 
+					socket.Connect(this._backendEndpoint);
+
+					var polling = new Polling(PollingEvents.RecvReady, socket);
+
+					// once data is ready, we pass it along to the actual worker
+					polling.RecvReady += _dummy => this._proc(socket);
+
+					while (_running)
+					{
+						polling.PollForever();
+					}
 				}
+			}
+			catch (ZmqException e)
+			{
+				if (e.ZmqErrorCode != Native.ETERM) throw;
 			}
 		}
 

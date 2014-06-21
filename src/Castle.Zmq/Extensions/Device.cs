@@ -106,7 +106,7 @@
 		{
 			if (this._needsBinding)
 			{
-				this.Backend.Connect(this.BackendEndpoint);
+				this.Backend.Bind(this.BackendEndpoint);
 			}
 		}
 

@@ -66,6 +66,7 @@
     <Compile Include="BaseContextSetUp.cs" />
     <Compile Include="Exts\ForwarderTestCase.cs" />
     <Compile Include="Exts\SharedQueueTestCase.cs" />
+    <Compile Include="Exts\WorkerPoolTestCase.cs" />
     <Compile Include="PollTestCase.cs" />
     <Compile Include="PubSubTestCase.cs" />
     <Compile Include="ReqRepTestCase.cs" />
