@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context.cs" />
+    <Compile Include="ContextExtensions.cs" />
     <Compile Include="Extensions\Device.cs" />
     <Compile Include="Extensions\Forwarder.cs" />
     <Compile Include="Extensions\SharedQueue.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Socket.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="SocketExtensions.cs" />
+    <Compile Include="Stubs\StubSocket.cs" />
     <Compile Include="ZmqException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

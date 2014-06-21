@@ -27,6 +27,13 @@
 			return error;
 		}
 
+		public static string LastErrorString(int errorcode = 0)
+		{
+			if (errorcode== 0) errorcode = Native.zmq_errno();
+			var errormsgptr = zmq_strerror(errorcode);
+			return Marshal.PtrToStringAnsi(errormsgptr);
+		}
+
 		/// <summary>
 		/// Should be called when a native zmq function returns error (-1)
 		/// </summary>
@@ -38,12 +45,8 @@
 
 		public static void ThrowZmqError(int error)
 		{
-			var errormsgptr = zmq_strerror(error);
-			if (errormsgptr != IntPtr.Zero)
-			{
-				var msg = Marshal.PtrToStringAnsi(errormsgptr);
-				throw new ZmqException(msg, error);
-			}
+			var msg = LastErrorString(error);
+			throw new ZmqException(msg, error);
 		}
 	}
 }

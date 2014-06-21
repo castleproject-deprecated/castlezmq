@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseContextSetUp.cs" />
+    <Compile Include="Exts\SharedQueueTestCase.cs" />
     <Compile Include="PollTestCase.cs" />
     <Compile Include="PubSubTestCase.cs" />
     <Compile Include="ReqRepTestCase.cs" />
