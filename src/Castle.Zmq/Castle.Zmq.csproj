@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Context.cs" />
     <Compile Include="ContextExtensions.cs" />
+    <Compile Include="Extensions\BaseSubscriber.cs" />
     <Compile Include="Extensions\Device.cs" />
     <Compile Include="Extensions\Forwarder.cs" />
     <Compile Include="Extensions\SharedQueue.cs" />
