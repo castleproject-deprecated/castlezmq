@@ -3,7 +3,7 @@
 	using System;
 
 	/// <summary>
-	/// Exposes a XREP(ROUTER) and a XREQ(DEALER) to dispatch requests 
+	/// Exposes a XREP(ROUTER) and a XREQ(DEALER) to dispatch requests fairly
 	/// to a bunch of workers (connected to xreq)
 	/// </summary>
 	public class SharedQueue : Device

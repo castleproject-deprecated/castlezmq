@@ -13,7 +13,7 @@
 	{
 		private volatile bool _disposed;
 		private readonly bool _ownSockets;
-		private readonly bool _initialized;
+		private bool _needsBinding;
 
 		protected Device(IZmqSocket frontend, IZmqSocket backend)
 		{
@@ -23,7 +23,7 @@
 			this.Frontend = frontend;
 			this.Backend = backend;
 
-			this._initialized = true;
+			this._needsBinding = false;
 		}
 
 		protected Device(Context ctx, string frontEndEndpoint, string backendEndpoint, 
@@ -34,22 +34,17 @@
 			if (string.IsNullOrEmpty(backendEndpoint)) throw new ArgumentNullException("backendEndpoint");
 
 			this._ownSockets = true;
+			this._needsBinding = true;
+
+			this.FrontEndEndpoint = frontEndEndpoint;
+			this.BackendEndpoint = backendEndpoint;
 
 			this.Frontend = ctx.CreateSocket(frontendType);
 			this.Backend = ctx.CreateSocket(backendType);
-
-			try
-			{
-				this.Frontend.Bind(frontEndEndpoint);
-				this.Backend.Connect(backendEndpoint);
-
-				this._initialized = true;
-			}
-			finally
-			{
-				this.Dispose();
-			}
 		}
+
+		public string FrontEndEndpoint { get; private set; }
+		public string BackendEndpoint { get; private set; }
 
 		public IZmqSocket Frontend { get; private set; }
 		public IZmqSocket Backend { get; private set; }
@@ -61,8 +56,12 @@
 
 		public virtual void Start()
 		{
+			EnsureNotDisposed();
 			if (!(this.Frontend is Socket)) throw new InvalidOperationException("Frontend instance is not a Socket");
 			if (!(this.Backend is Socket)) throw new InvalidOperationException("Backend instance is not a Socket");
+
+			StartFrontEnd();
+			StartBackEnd();
 
 			Task.Factory.StartNew(() =>
 			{
@@ -73,6 +72,21 @@
 				var res = Native.Device.zmq_proxy(front.SocketPtr, back.SocketPtr, IntPtr.Zero);
 				if (res == Native.ErrorCode) Native.ThrowZmqError();
 			});
+		}
+
+		protected virtual void StartFrontEnd()
+		{
+			if (this._needsBinding)
+			{
+				this.Frontend.Bind(this.FrontEndEndpoint);
+			}
+		}
+		protected virtual void StartBackEnd()
+		{
+			if (this._needsBinding)
+			{
+				this.Backend.Connect(this.BackendEndpoint);
+			}
 		}
 
 		protected virtual void DoDispose()
@@ -95,16 +109,16 @@
 
 			this._disposed = true;
 
-			if (_initialized)
-			{
-				this.DoDispose();
-			}
-
 			if (_ownSockets)
 			{
 				if (this.Frontend != null) this.Frontend.Dispose();
 				if (this.Backend != null) this.Backend.Dispose();
 			}
+		}
+
+		internal void EnsureNotDisposed()
+		{
+			if (_disposed) throw new ObjectDisposedException("Device was disposed");
 		}
 	}
 }

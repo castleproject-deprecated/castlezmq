@@ -22,6 +22,8 @@ namespace Castle.Zmq.Extensions
 
 		public override void Start()
 		{
+			EnsureNotDisposed();
+
 			this._running = true;
 
 			for (int i = 0; i < _workers; i++)
