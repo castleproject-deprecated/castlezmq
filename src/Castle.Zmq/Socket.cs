@@ -68,14 +68,15 @@
 		/// ZMQ_XPUB_VERBOSE, ZMQ_REQ_CORRELATE, and ZMQ_REQ_RELAXED, 
 		/// only take effect for subsequent socket bind/connects.
 		/// </remarks>
-		/// <param name="option"> <see cref="SocketOpt"/> for a list of options </param>
-		/// <param name="value"> value must be allocated in unmanaged memory </param>
-		/// <param name="valueSize"> size of the block allocated for value </param>
-		public void SetOption(int option, IntPtr value, int valueSize)
+		/// <typeparam name="T"></typeparam>
+		/// <param name="option"></param>
+		/// <param name="value"></param>
+		public void SetOption<T>(int option, T value)
 		{
 			EnsureNotDisposed();
+			if (Object.ReferenceEquals(value,null)) throw new ArgumentNullException("value");
 
-			InternalSetOption(option, valueSize, value, ignoreError: false);
+			InternalSetOption(option, typeof(T), value, ignoreError: false);
 		}
 
 		public T GetOption<T>(int option)
@@ -221,8 +222,10 @@
 			var res = Native.Socket.zmq_close(this._socketPtr);
 			if (res == Native.ErrorCode)
 			{
-				// we cannot throw in dispose. should we log?
-				System.Diagnostics.Debug.WriteLine("Error disposing socket " + Native.LastError());
+				// we cannot throw in dispose. 
+				var msg = "Error disposing socket: " + Native.LastErrorString();
+				System.Diagnostics.Trace.TraceError(msg);
+				System.Diagnostics.Debug.WriteLine(msg);
 			}
 		}
 
@@ -231,13 +234,72 @@
 			if (_disposed) throw new ObjectDisposedException("Socket was disposed");
 		}
 
-		private void InternalSetOption(int option, int valueSize, IntPtr value, bool ignoreError)
+		private void InternalSetOption(int option, Type valueType, object value, bool ignoreError)
 		{
-			// DO NOT check whether it's disposed here
+			// it would be great to assert that the option and value match their expected type
+			// as it varies per option
 
-			var res = Native.Socket.zmq_setsockopt(this._socketPtr, option, value, valueSize);
-			if (!ignoreError && res == Native.ErrorCode) Native.ThrowZmqError();
+			Action<IntPtr, object> marshaller = null;
+			var bufferSize = 0;
+
+			if (valueType == typeof (int))
+			{
+				bufferSize = sizeof (int);
+				marshaller = (ptr, v) => Marshal.WriteInt32(ptr, (int) v);
+			}
+			else if (valueType == typeof (Int64))
+			{
+				bufferSize = sizeof(Int64);
+				marshaller = (ptr, v) => Marshal.WriteInt64(ptr, (long)v);
+			}
+			else if (valueType == typeof(bool))
+			{
+				bufferSize = sizeof(int);
+
+				marshaller = (ptr, v) =>
+				{
+					var b = (bool) v;
+					Marshal.WriteInt32(ptr, b ? 1 : 0);
+				};
+			}
+			else if (valueType == typeof(byte[]))
+			{
+				var b = (byte[]) value;
+				bufferSize = b.Length;
+
+				marshaller = (ptr, v) =>
+				{
+					var array = (byte[])v;
+					Marshal.Copy(array, 0, ptr, array.Length);
+				};
+			}
+			else if (valueType == typeof (string))
+			{
+				var s = (string)value;
+				bufferSize = Encoding.UTF8.GetBytes(s).Length;
+
+				marshaller = (ptr, v) =>
+				{
+					var vStr = (string)value;
+					var array = Encoding.UTF8.GetBytes(vStr);
+					Marshal.Copy(array, 0, ptr, array.Length);
+				};
+			}
+			else
+			{
+				throw new ArgumentException("Unsupported type for value " + valueType.Name);
+			}
+
+			MarshalExt.AllocAndRun(bufPtr =>
+			{
+				marshaller(bufPtr, value);
+
+				var res = Native.Socket.zmq_setsockopt(this._socketPtr, option, bufPtr, bufferSize);
+				if (!ignoreError && res == Native.ErrorCode) Native.ThrowZmqError();
+
+			}, bufferSize);
 		}
+
 
 		private object InternalGetOption(Type retType, int option)
 		{
@@ -258,7 +320,7 @@
 					if (res == Native.ErrorCode) Native.ThrowZmqError();
 
 					retValue = unmarshaller(bufferPtr, bufferLen);
-				}, bufferLen);
+				}, (int)bufferLen);
 
 			}, sizeof(Int64));
 
@@ -312,11 +374,7 @@
 
 		private void TryCancelLinger()
 		{
-			MarshalExt.AllocAndRun((intBuffer) =>
-			{
-				Marshal.WriteInt32(intBuffer, 0);
-				InternalSetOption((int)SocketOpt.LINGER, sizeof(int), intBuffer, ignoreError: true);	
-			}, sizeof(int));
+			InternalSetOption((int)SocketOpt.LINGER, typeof(int), 0, ignoreError: true);
 		}
 	}
 }

@@ -4,8 +4,18 @@
 	using System.Runtime.InteropServices;
 	using System.Text;
 
+	/// <summary>
+	/// Convinience API exposed for sockets. 
+	/// </summary>
 	public static class SocketExtensions
 	{
+		/// <summary>
+		/// Returns true if the last message received has indicated 
+		/// that there's more to come (part of a multipart message). 
+		/// Otherwise false.
+		/// </summary>
+		/// <param name="source"></param>
+		/// <returns>true if last message was a multipart message</returns>
 		public static bool HasMoreToRecv(this IZmqSocket source)
 		{
 			return source.GetOption<bool>(SocketOpt.RCVMORE);
@@ -44,6 +54,12 @@
 			return encoding.GetString(buffer);
 		}
 
+		/// <summary>
+		/// Sends the byte[] message and uses the specified flags to configure the sending behavior.
+		/// </summary>
+		/// <param name="source"></param>
+		/// <param name="message">The byte array to send</param>
+		/// <param name="flags">Send flags configuring the sending operation</param>
 		public static void Send(this IZmqSocket source, byte[] message, SendFlags flags)
 		{
 			bool hasMore = (flags & SendFlags.SendMore) != 0;
@@ -53,13 +69,14 @@
 		}
 
 		/// <summary>
-		/// 
+		/// Sends a string message, converting to bytes using the 
+		/// encoding specified. If none, uses UTF8.
 		/// </summary>
 		/// <param name="source"></param>
-		/// <param name="message"></param>
+		/// <param name="message">The string message</param>
 		/// <param name="encoding">If not specified, defaults to UTF8</param>
-		/// <param name="hasMoreToSend"></param>
-		/// <param name="noWait"></param>
+		/// <param name="hasMoreToSend">Flag indicating whether it's a multipart message</param>
+		/// <param name="noWait">Indicates that the sock must send the message immediately</param>
 		public static void Send(this IZmqSocket source, string message, Encoding encoding = null, 
 								bool hasMoreToSend = false, bool noWait = false)
 		{
@@ -83,58 +100,49 @@
 
 		public static void SetOption(this IZmqSocket source, SocketOpt option, int value)
 		{
-			const int len = sizeof(int);
-
-			MarshalExt.AllocAndRun((valPtr) =>
-			{
-				Marshal.WriteInt32(valPtr, value);
-				source.SetOption((int)option, valPtr, sizeof(int));
-			}, len);
+			source.SetOption<int>((int)option, value);
 		}
 
 		public static void SetOption(this IZmqSocket source, SocketOpt option, Int64 value)
 		{
-			const int len = sizeof (Int64);
-
-			MarshalExt.AllocAndRun((valPtr) =>
-			{
-				Marshal.WriteInt64(valPtr, value);
-				source.SetOption((int)option, valPtr, len);
-			}, len);
+			source.SetOption<Int64>((int)option, value);
 		}
 
 		public static void SetOption(this IZmqSocket source, SocketOpt option, string value)
 		{
 			if (value == null) throw new ArgumentNullException("value");
 
-			var buffer = Encoding.UTF8.GetBytes(value);
-
-			SetOption(source, option, buffer);
+			source.SetOption<string>((int)option, value);
 		}
 
 		public static void SetOption(this IZmqSocket source, SocketOpt option, byte[] buffer)
 		{
 			if (buffer == null) throw new ArgumentNullException("buffer");
 
-			var len = buffer.Length;
-
-			MarshalExt.AllocAndRun((valPtr) =>
-			{
-				Marshal.Copy(buffer, 0, valPtr, len);
-				source.SetOption((int)option, valPtr, len);
-			}, len);
+			source.SetOption<byte[]>((int)option, buffer);
 		}
 
+		/// <summary>
+		/// Subscribe to everything a publisher sends. 
+		/// Internally sends an empty byte array
+		/// </summary>
 		public static void SubscribeAll(this IZmqSocket source)
 		{
 			source.Subscribe("");
 		}
 
+		/// <summary>
+		/// Unsubscribe to everything a publisher sends.
+		/// Internally sends an empty byte array
+		/// </summary>
 		public static void UnsubscribeAll(this IZmqSocket source)
 		{
 			source.Unsubscribe("");
 		}
 
+		/// <summary>
+		/// Subscribe to all topics specified.
+		/// </summary>
 		public static void Subscribe(this IZmqSocket source, string[] topics)
 		{
 			foreach (var topic in topics)
@@ -143,6 +151,9 @@
 			}
 		}
 
+		/// <summary>
+		/// Unsubscribe from all topics specified.
+		/// </summary>
 		public static void Unsubscribe(this IZmqSocket source, string[] topics)
 		{
 			foreach (var topic in topics)

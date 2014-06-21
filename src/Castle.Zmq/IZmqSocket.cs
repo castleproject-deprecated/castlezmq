@@ -2,11 +2,12 @@
 {
 	using System;
 
-	
-
 	/// <summary>
 	/// This is only exposed to aid libraries in 
-	/// stubing the real implementations
+	/// stubing/mocking the real implementation. 
+	/// 
+	/// This api is kept at minimum. 
+	/// A more friendly API is exposed by the extensions on SocketExtensions
 	/// </summary>
 	public interface IZmqSocket : IDisposable
 	{
@@ -25,7 +26,7 @@
 
 		void Unsubscribe(string topic);
 
-		void SetOption(int option, IntPtr value, int valueSize);
+		void SetOption<T>(int option, T value);
 		T GetOption<T>(int option);
 	}
 }
