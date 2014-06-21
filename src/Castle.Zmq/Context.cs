@@ -9,7 +9,7 @@
 	{
 		private volatile bool _disposed;
 		
-		internal IntPtr contextPtr;
+		internal readonly IntPtr contextPtr;
 
 		public const int DefaultIoThreads = 1;
 		public const int DefaultMaxSockets = 1024;
@@ -97,11 +97,11 @@
 				var error = Native.Context.zmq_ctx_term(this.contextPtr);
 				if (error == Native.ErrorCode)
 				{
-					// Not good, but we can't throw an exception in the Dispose - should we log it?
-					System.Diagnostics.Debug.WriteLine("Error disposing context " + Native.LastError());
+					// Not good, but we can't throw an exception in the Dispose
+					var msg = "Error disposing context: " + Native.LastErrorString();
+					System.Diagnostics.Trace.TraceError(msg);
+					System.Diagnostics.Debug.WriteLine(msg);
 				}
-
-				this.contextPtr = IntPtr.Zero;
 			}
 		}
 	}
