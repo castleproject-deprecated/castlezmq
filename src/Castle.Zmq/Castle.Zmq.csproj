@@ -66,7 +66,7 @@
     <Compile Include="Extensions\Forwarder.cs" />
     <Compile Include="Extensions\SharedQueue.cs" />
     <Compile Include="Extensions\WorkerPool.cs" />
-    <Compile Include="MsgFrame.cs" />
+    <Compile Include="Internal\MsgFrame.cs" />
     <Compile Include="Native\Native.MsgFrame.cs" />
     <Compile Include="Native\MarshalExt.cs" />
     <Compile Include="Native\Native.Poll.cs" />

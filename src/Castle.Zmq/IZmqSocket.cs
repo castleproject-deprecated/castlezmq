@@ -18,7 +18,7 @@
 		void Connect(string endpoint);
 		void Disconnect(string endpoint);
 
-		byte[] Recv(int flags = 0);
+		byte[] Recv(bool noWait = false);
 
 		void Send(byte[] buffer, bool hasMoreToSend = false, bool noWait = false);
 

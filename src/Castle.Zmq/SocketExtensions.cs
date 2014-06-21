@@ -23,7 +23,8 @@
 
 		public static byte[] Recv(this IZmqSocket source, RecvFlags flags)
 		{
-			return source.Recv((int) flags);
+			bool doNotWait = (flags & RecvFlags.DoNotWait) != 0;
+			return source.Recv(doNotWait);
 		}
 
 		/// <summary>

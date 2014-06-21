@@ -19,6 +19,9 @@
 
 		#endregion
 
+		private const int HAUSNUM = 156384712;
+		public const int ETERM = HAUSNUM + 53;
+
 		public const int ErrorCode = -1;
 
 		public static int LastError()

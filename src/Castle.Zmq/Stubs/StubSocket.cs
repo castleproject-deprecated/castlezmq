@@ -98,7 +98,7 @@
 			this.ConnectedToEndpoint = endpoint;
 		}
 
-		public virtual byte[] Recv(int flags = 0)
+		public virtual byte[] Recv(bool noWait = false)
 		{
 			EnsureNotDisposed();
 

@@ -11,9 +11,12 @@
 	/// </summary>
 	public abstract class Device : IDisposable
 	{
+		private readonly Context _ctx;
+		private readonly SocketType _frontendType;
+		private readonly SocketType _backendType;
 		private volatile bool _disposed;
 		private readonly bool _ownSockets;
-		private bool _needsBinding;
+		private readonly bool _needsBinding;
 
 		protected Device(IZmqSocket frontend, IZmqSocket backend)
 		{
@@ -33,14 +36,14 @@
 			if (string.IsNullOrEmpty(frontEndEndpoint)) throw new ArgumentNullException("frontEndEndpoint");
 			if (string.IsNullOrEmpty(backendEndpoint)) throw new ArgumentNullException("backendEndpoint");
 
+			this._ctx = ctx;
+			this._frontendType = frontendType;
+			this._backendType = backendType;
 			this._ownSockets = true;
 			this._needsBinding = true;
 
 			this.FrontEndEndpoint = frontEndEndpoint;
 			this.BackendEndpoint = backendEndpoint;
-
-			this.Frontend = ctx.CreateSocket(frontendType);
-			this.Backend = ctx.CreateSocket(backendType);
 		}
 
 		public string FrontEndEndpoint { get; private set; }
@@ -57,20 +60,38 @@
 		public virtual void Start()
 		{
 			EnsureNotDisposed();
-			if (!(this.Frontend is Socket)) throw new InvalidOperationException("Frontend instance is not a Socket");
-			if (!(this.Backend is Socket)) throw new InvalidOperationException("Backend instance is not a Socket");
-
-			StartFrontEnd();
-			StartBackEnd();
+			if (!this._ownSockets)
+			{
+				if (!(this.Frontend is Socket)) throw new InvalidOperationException("Frontend instance is not a Socket");
+				if (!(this.Backend is Socket)) throw new InvalidOperationException("Backend instance is not a Socket");
+			}
 
 			Task.Factory.StartNew(() =>
 			{
+				if (this._ownSockets)
+				{
+					this.Frontend = _ctx.CreateSocket(this._frontendType);
+					this.Backend = _ctx.CreateSocket(this._backendType);
+				}
+
 				var front = (Socket)this.Frontend;
 				var back = (Socket)this.Backend;
 
+				StartFrontEnd();
+				StartBackEnd();
+
 				// this will block forever, hence it's running in a separate thread
-				var res = Native.Device.zmq_proxy(front.SocketPtr, back.SocketPtr, IntPtr.Zero);
-				if (res == Native.ErrorCode) Native.ThrowZmqError();
+				var res = Native.Device.zmq_proxy(front._socketPtr, back._socketPtr, IntPtr.Zero);
+				if (res == Native.ErrorCode)
+				{
+					// this is expected
+					if (Native.LastError() == Native.ETERM) return;
+					
+					// not expected
+					var msg = "Error on zmq_proxy: " + Native.LastErrorString();
+					System.Diagnostics.Trace.TraceError(msg);
+					System.Diagnostics.Debug.WriteLine(msg);
+				}
 			});
 		}
 

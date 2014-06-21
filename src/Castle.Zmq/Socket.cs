@@ -11,7 +11,7 @@
 		private readonly SocketType _type;
 		private volatile bool _disposed;
 
-		private IntPtr _socketPtr;
+		internal IntPtr _socketPtr;
 
 		public const int NoTimeout = 0;
 
@@ -51,7 +51,6 @@
 			InternalDispose(false);
 		}
 
-		internal IntPtr SocketPtr { get { return _socketPtr; } }
 
 		public SocketType SocketType
 		{
@@ -59,34 +58,7 @@
 			get { return this._type; }
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <remarks>
-		/// Caution: All options, with the exception of 
-		/// ZMQ_SUBSCRIBE, ZMQ_UNSUBSCRIBE, ZMQ_LINGER, ZMQ_ROUTER_MANDATORY, ZMQ_PROBE_ROUTER, 
-		/// ZMQ_XPUB_VERBOSE, ZMQ_REQ_CORRELATE, and ZMQ_REQ_RELAXED, 
-		/// only take effect for subsequent socket bind/connects.
-		/// </remarks>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="option"></param>
-		/// <param name="value"></param>
-		public void SetOption<T>(int option, T value)
-		{
-			EnsureNotDisposed();
-			if (Object.ReferenceEquals(value,null)) throw new ArgumentNullException("value");
-
-			InternalSetOption(option, typeof(T), value, ignoreError: false);
-		}
-
-		public T GetOption<T>(int option)
-		{
-			EnsureNotDisposed();
-
-			var retT = typeof(T);
-
-			return (T) this.InternalGetOption(retT, option);
-		}
+		#region Bind and Connect
 
 		public void Bind(string endpoint)
 		{
@@ -124,12 +96,16 @@
 			if (res == Native.ErrorCode) Native.ThrowZmqError();
 		}
 
-		public byte[] Recv(int flags = 0)
+		#endregion
+
+		public byte[] Recv(bool noWait = false)
 		{
 			EnsureNotDisposed();
 
 			using (var frame = new MsgFrame())
 			{
+				var flags = noWait ? Native.Socket.DONTWAIT : 0;
+
 				var res = Native.MsgFrame.zmq_msg_recv(frame._msgPtr, this._socketPtr, flags);
 
 				if (res == Native.ErrorCode)
@@ -199,6 +175,35 @@
 
 			var buf = Encoding.UTF8.GetBytes(topic);
 			SocketExtensions.SetOption(this, SocketOpt.UNSUBSCRIBE, buf);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <remarks>
+		/// Caution: All options, with the exception of 
+		/// ZMQ_SUBSCRIBE, ZMQ_UNSUBSCRIBE, ZMQ_LINGER, ZMQ_ROUTER_MANDATORY, ZMQ_PROBE_ROUTER, 
+		/// ZMQ_XPUB_VERBOSE, ZMQ_REQ_CORRELATE, and ZMQ_REQ_RELAXED, 
+		/// only take effect for subsequent socket bind/connects.
+		/// </remarks>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="option"></param>
+		/// <param name="value"></param>
+		public void SetOption<T>(int option, T value)
+		{
+			EnsureNotDisposed();
+			if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException("value");
+
+			InternalSetOption(option, typeof(T), value, ignoreError: false);
+		}
+
+		public T GetOption<T>(int option)
+		{
+			EnsureNotDisposed();
+
+			var retT = typeof(T);
+
+			return (T)this.InternalGetOption(retT, option);
 		}
 
 		public void Dispose()
