@@ -53,8 +53,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -62,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Context.cs" />
     <Compile Include="ContextExtensions.cs" />
+    <Compile Include="Extensions\BasePublisher.cs" />
     <Compile Include="Extensions\BaseSubscriber.cs" />
     <Compile Include="Extensions\Device.cs" />
     <Compile Include="Extensions\Forwarder.cs" />

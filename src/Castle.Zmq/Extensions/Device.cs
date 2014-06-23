@@ -11,7 +11,7 @@
 	/// </summary>
 	public abstract class Device : IDisposable
 	{
-		private readonly Context _ctx;
+		private readonly IZmqContext _ctx;
 		private readonly SocketType _frontendType;
 		private readonly SocketType _backendType;
 		private volatile bool _disposed;
@@ -29,7 +29,7 @@
 			this._needsBinding = false;
 		}
 
-		protected Device(Context ctx, string frontEndEndpoint, string backendEndpoint, 
+		protected Device(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint, 
 						 SocketType frontendType, SocketType backendType)
 		{
 			if (ctx == null) throw new ArgumentNullException("ctx");

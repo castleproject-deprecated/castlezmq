@@ -14,7 +14,7 @@
 			if (backend.SocketType != SocketType.Dealer) throw new ArgumentException("Backend must be a Dealer");
 		}
 
-		public SharedQueue(Context ctx, string frontEndEndpoint, string backendEndpoint)
+		public SharedQueue(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint)
 			: base(ctx, frontEndEndpoint, backendEndpoint, SocketType.Router, SocketType.Dealer)
 		{
 		}

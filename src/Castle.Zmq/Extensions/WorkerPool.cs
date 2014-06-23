@@ -5,13 +5,13 @@ namespace Castle.Zmq.Extensions
 
 	public class WorkerPool : SharedQueue
 	{
-		private readonly Context _ctx;
+		private readonly IZmqContext _ctx;
 		private readonly string _backendEndpoint;
 		private readonly Action<IZmqSocket> _proc;
 		private readonly int _workers;
 		private volatile bool _running;
 
-		public WorkerPool(Context ctx, string frontEndEndpoint, string backendEndpoint, Action<IZmqSocket> proc, int workers)
+		public WorkerPool(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint, Action<IZmqSocket> proc, int workers)
 			: base(ctx, frontEndEndpoint, backendEndpoint)
 		{
 			this._ctx = ctx;
