@@ -1,11 +1,9 @@
-﻿
+﻿module PerfCounters
 
-module PerfCounters
+    open Castle.Zmq.Counters
 
-    // open ZMQ.Counters
-
-    // let sentCounter = PerfCounterRegistry.Get(PerfCounters.NumberOfRequestsSent)
-    // let receivedCounter = PerfCounterRegistry.Get(PerfCounters.NumberOfResponseReceived)
+    let sentCounter = PerfCounterRegistry.Get(PerfCounters.NumberOfRequestsSent)
+    let receivedCounter = PerfCounterRegistry.Get(PerfCounters.NumberOfResponseReceived)
 
     let private isPerfCountingEnable = ref false
 
@@ -16,12 +14,10 @@ module PerfCounters
 
 
     let inline IncrementSent () = 
-        // if isPerfCounterEnabled 
-        // then sentCounter.Increment() |> ignore
-        ()
+        if isPerfCounterEnabled 
+        then sentCounter.Increment() |> ignore
 
     let inline IncrementRcv () = 
-        // if isPerfCounterEnabled 
-        // then receivedCounter.Increment() |> ignore
-        ()
+        if isPerfCounterEnabled 
+        then receivedCounter.Increment() |> ignore
 

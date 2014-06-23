@@ -55,8 +55,17 @@
 			watch.Start();
 
 			// 1000
-			for (var i = 0; i < 100; i++)
+			for (var i = 0; i < 1000000; i++)
 			{
+				if (i % 1000 == 0)
+				{
+					var collCount0 = GC.CollectionCount(0);
+					var collCount1 = GC.CollectionCount(1);
+					var collCount2 = GC.CollectionCount(2);
+
+					Console.WriteLine("Collections on Gen 0 {0}, Gen 1 {1}, Gen 2 {2} ", collCount0, collCount1, collCount2);
+				}
+
 				// Console.WriteLine("new batch ");
 
 				service.NoParamsOrReturn();

@@ -53,6 +53,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
@@ -61,6 +62,8 @@
   <ItemGroup>
     <Compile Include="Context.cs" />
     <Compile Include="ContextExtensions.cs" />
+    <Compile Include="Counters\PerfCounterRegistry.cs" />
+    <Compile Include="Counters\PerfCounters.cs" />
     <Compile Include="Extensions\BasePublisher.cs" />
     <Compile Include="Extensions\BaseRequest.cs" />
     <Compile Include="Extensions\BaseSubscriber.cs" />
