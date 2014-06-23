@@ -21,6 +21,15 @@
     open Castle.Zmq.Rpc.Model
     open Castle.Zmq.Extensions
 
+    module Utils = 
+        
+
+        let generate_uniqueInprocEndpoint () = 
+            use rndgen = System.Security.Cryptography.RandomNumberGenerator.Create()
+            let buffer = Array.zeroCreate 4
+            rndgen.GetBytes(buffer)
+            BitConverter.ToString(buffer).Replace("-", String.Empty)
+
 
     type Dispatcher(kernel:IKernel) =
         // static let logger = log4net.LogManager.GetLogger(typeof<Dispatcher>)
@@ -52,13 +61,9 @@
     type RemoteRequestListener(bindAddress:String, workers:int, zContextAccessor:IZmqContext, dispatcher:Dispatcher) =
         static let logger = log4net.LogManager.GetLogger(typeof<RemoteRequestListener>)
 
+        let mutable inprocUniqueName = "inproc://w_" + Utils.generate_uniqueInprocEndpoint()
         let mutable disposed = false
         let mutable pool:WorkerPool = null
-
-        let config = lazy
-                        let parts = bindAddress.Split(':')
-                        // ZConfig(parts.[0], Convert.ToUInt32(parts.[1]), Transport.TCP)
-                        ()
 
         member this.thread_worker (socket:IZmqSocket) = 
 
@@ -114,18 +119,15 @@
             override this.Start() = 
                 logger.Debug("Starting " + this.GetType().Name)
 
-                let c = config.Force()
-
                 if (pool <> null) then pool.Dispose()
 
-                pool <- new WorkerPool(zContextAccessor, c.ToString(), c.Local, new ThreadStart(this.thread_worker), workers)
+                pool <- new WorkerPool(zContextAccessor, bindAddress, inprocUniqueName, Action<IZmqSocket>(this.thread_worker), workers)
                 pool.Start()
 
-                logger.InfoFormat("Binding {0} on {1}:{2} with {3} workers", this.GetType().Name, c.Ip, c.Port, workers)
+                logger.InfoFormat("Binding {0} on {1} with {3} workers", this.GetType().Name, bindAddress, workers)
 
             override this.Stop() = 
-                if pool <> null then
-                    pool.Stop()
+                ()
 
         interface IDisposable with
             override this.Dispose() =
@@ -134,22 +136,18 @@
                     pool.Dispose()
 
 
-    type RemoteRequest(zContextAccessor:Castle.Zmq.Context, message:RequestMessage, endpoint:string) = 
-        inherit BaseRequest<ResponseMessage>(zContextAccessor)
+    type RemoteRequest(zContextAccessor:Castle.Zmq.Context, message:RequestMessage, endpoint:string) as self = 
+        inherit BaseRequest<ResponseMessage>(zContextAccessor, endpoint)
 
-        let config = lazy
-                        let parts = endpoint.Split(':')
-                        ZConfig(parts.[0], Convert.ToUInt32(parts.[1]), Transport.TCP)
+        do
+            self.Timeout <- 30 * 1000
 
-        override this.GetConfig() = config.Force()
-
-        override this.Timeout with get() = 30 * 1000
-
-        override this.InternalGet(socket) =
+        override this.SendRequest(socket) =
             socket.Send(serialize_with_protobuf(message))
-    
             PerfCounters.IncrementSent ()
 
+        override this.GetReply(socket) =
+            socket.Send(serialize_with_protobuf(message))
             let bytes = socket.Recv()
             
             if bytes <> null then
@@ -158,7 +156,7 @@
 //                baseElapsedCounter.Increment() |> ignore
 
             if bytes = null then
-                let m = "Remote call took too long to respond. Is the server up? " + (config.Value.ToString())
+                let m = "Remote call took too long to respond. Is the server up? " + endpoint
                 ResponseMessage(null, null, ExceptionInfo("Timeout", m))
             else
                 deserialize_with_protobuf<ResponseMessage>(bytes)
@@ -180,7 +178,7 @@
             routes.[assembly] <- address
 
 
-    type RemoteRequestInterceptor(zContextAccessor:ZContextAccessor, router:RemoteRouter) =
+    type RemoteRequestInterceptor(zContextAccessor:Castle.Zmq.Context, router:RemoteRouter) =
         static let logger = log4net.LogManager.GetLogger(typeof<RemoteRequestInterceptor>)
 
         interface IInterceptor with
@@ -233,11 +231,11 @@
             model.Interceptors.Add(new InterceptorReference(typeof<RemoteRequestInterceptor>))
         
         override this.ProcessModel(kernel, model) =
-            if (model.Services |> Seq.exists (fun s -> s.IsDefined(typeof<RemoteServiceAttribute>, false))) then
+            if (model.Services |> Seq.exists (fun s -> s.IsDefined(typeof<Castle.Zmq.Rpc.RemoteServiceAttribute>, false))) then
                 this.add_interceptor(model)
 
     [<AllowNullLiteralAttribute>]
-    type Reaper(zContextAccessor:ZContextAccessor) =
+    type Reaper(zContextAccessor:Castle.Zmq.Context) =
         static let logger = log4net.LogManager.GetLogger(typeof<Reaper>)
 
         let mutable _disposed = false

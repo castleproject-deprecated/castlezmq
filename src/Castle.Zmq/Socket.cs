@@ -14,6 +14,7 @@
 		internal IntPtr _socketPtr;
 
 		public const int NoTimeout = 0;
+		public const int InfiniteTimeout = -1;
 
 		/// <summary>
 		/// 

@@ -24,6 +24,18 @@
 	[ProtoContract(SkipConstructor = true)]
 	public class RequestMessage
 	{
+		public RequestMessage()
+		{
+		}
+
+		public RequestMessage(string targetService, string targetMethod, ParamTuple[] @params, string[] paramTypes)
+		{
+			TargetService = targetService;
+			TargetMethod = targetMethod;
+			Params = @params;
+			ParamTypes = paramTypes;
+		}
+
 		[ProtoMember(1)]
 		public string TargetService { get; set; }
 		[ProtoMember(2)]
