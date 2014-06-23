@@ -9,7 +9,7 @@ namespace Castle.Facilities.Zmq.Rpc
     open Castle.Facilities.Zmq.Rpc.Internals
 
 
-    type ZeroMQFacility() =
+    type ZmqRpcFacility() =
         inherit AbstractFacility()
 
         let _reaper : Ref<Reaper> = ref null
@@ -34,7 +34,7 @@ namespace Castle.Facilities.Zmq.Rpc
             if not (base.Kernel.GetFacilities() |> Seq.exists (fun f -> f.GetType() = typeof<StartableFacility>)) then
                 base.Kernel.AddFacility<StartableFacility>() |> ignore
 
-            base.Kernel.Register(Component.For<Castle.Zmq.Context>(),
+            base.Kernel.Register(Component.For<Castle.Zmq.Context>().Forward<Castle.Zmq.IZmqContext>(),
                                  Component.For<RemoteRouter>(),
                                  Component.For<Dispatcher>(),
                                  Component.For<RemoteRequestInterceptor>().LifeStyle.Transient) |> ignore

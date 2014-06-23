@@ -65,22 +65,16 @@
         let mutable disposed = false
         let mutable pool:WorkerPool = null
 
-        member this.thread_worker (socket:IZmqSocket) = 
+        member this.thread_worker (buffer:byte[]) (socket:IZmqSocket) = 
 
-            // use socket = zContextAccessor.Rep()
             try
-                // socket.SetRecvTimeout(1000)
-                // socket.Connect(config.Force().Local)
+                if (buffer <> null) then
+                    let reply = this.GetReplyFor(buffer);
+                    let reply = 
+                        if reply <> null then reply 
+                        else Array.zeroCreate<byte> 0
 
-                while (not disposed) do
-                    let buffer = socket.Recv()
-                    if (buffer <> null) then
-                        let reply = this.GetReplyFor(buffer);
-                        let reply = 
-                            if reply <> null then reply 
-                            else Array.zeroCreate<byte> 0
-
-                        socket.Send(  reply );
+                    socket.Send(  reply );
                     ()
             with
                 | ex -> logger.Fatal("Error in worker thread", ex)
@@ -121,7 +115,7 @@
 
                 if (pool <> null) then pool.Dispose()
 
-                pool <- new WorkerPool(zContextAccessor, bindAddress, inprocUniqueName, Action<IZmqSocket>(this.thread_worker), workers)
+                pool <- new WorkerPool(zContextAccessor, bindAddress, inprocUniqueName, Action<byte[],IZmqSocket>(this.thread_worker), workers)
                 pool.Start()
 
                 logger.InfoFormat("Binding {0} on {1} with {3} workers", this.GetType().Name, bindAddress, workers)
@@ -147,7 +141,6 @@
             PerfCounters.IncrementSent ()
 
         override this.GetReply(socket) =
-            socket.Send(serialize_with_protobuf(message))
             let bytes = socket.Recv()
             
             if bytes <> null then
@@ -172,7 +165,14 @@
         member this.GetEndpoint(assembly:Assembly) =
             let overriden = CallContext.GetData("0mq.facility.endpoint") :?> string
 
-            if String.IsNullOrEmpty(overriden) then routes.[assembly.GetName().Name] else overriden
+            let name = assembly.GetName().Name
+
+            if String.IsNullOrEmpty(overriden) then 
+                let res,v = routes.TryGetValue(name)
+                if (res) then v
+                else raise (InvalidOperationException("No endpoint configured for " + name))
+            else
+                overriden
 
         member this.ReRoute(assembly: string, address: string) =
             routes.[assembly] <- address
@@ -203,6 +203,7 @@
                         let request = RequestMessage(invocation.Method.DeclaringType.AssemblyQualifiedName, 
                                                      invocation.Method.Name, args, methodMeta)
                         let endpoint = router.GetEndpoint(invocation.Method.DeclaringType.Assembly)
+                        let endpoint = if (endpoint.StartsWith("tcp://")) then endpoint else "tcp://" + endpoint
 
                         let request = RemoteRequest(zContextAccessor, request, endpoint)
                         let response = request.Get()
@@ -259,8 +260,6 @@
             member this.Dispose() = dispose()
 
 
-
-            (*
     type AlternativeRouteContext(route: string) =
         do
            CallContext.SetData("0mq.facility.endpoint", route)
@@ -271,4 +270,3 @@
 
         static member For(r: string) =
             (new AlternativeRouteContext(r)) :> IDisposable
-            *)

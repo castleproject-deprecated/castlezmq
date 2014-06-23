@@ -14,11 +14,11 @@
 		{
 			var counter = 0;
 
-			Action<IZmqSocket> proc = socket =>
+			Action<byte[], IZmqSocket> proc = (data, socket) =>
 			{
 				Interlocked.Increment(ref counter);
 
-				var data = socket.Recv();
+				// var data = socket.Recv();
 				Thread.Sleep(1); // preparing beverage
 				socket.Send("done");
 			};

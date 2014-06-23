@@ -7,11 +7,11 @@ namespace Castle.Zmq.Extensions
 	{
 		private readonly IZmqContext _ctx;
 		private readonly string _backendEndpoint;
-		private readonly Action<IZmqSocket> _proc;
+		private readonly Action<byte[], IZmqSocket> _proc;
 		private readonly int _workers;
 		private volatile bool _running;
 
-		public WorkerPool(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint, Action<IZmqSocket> proc, int workers)
+		public WorkerPool(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint, Action<byte[], IZmqSocket> proc, int workers)
 			: base(ctx, frontEndEndpoint, backendEndpoint)
 		{
 			this._ctx = ctx;
@@ -45,7 +45,11 @@ namespace Castle.Zmq.Extensions
 					var polling = new Polling(PollingEvents.RecvReady, socket);
 
 					// once data is ready, we pass it along to the actual worker
-					polling.RecvReady += _dummy => this._proc(socket);
+					polling.RecvReady += _dummy =>
+					{
+						var msg = socket.Recv();
+						this._proc(msg, socket);
+					};
 
 					while (_running)
 					{

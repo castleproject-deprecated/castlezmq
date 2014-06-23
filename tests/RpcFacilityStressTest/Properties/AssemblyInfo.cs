@@ -5,24 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Castle.Zmq")]
-
-#if x64
-[assembly: AssemblyDescription("Compiled with dependency on x64 libzmq")]
-#else 
-[assembly: AssemblyDescription("Compiled with dependency on x86/win32 libzmq")]
-#endif
-
-#if DEBUG
-[assembly: AssemblyConfiguration("Debug")]
-#else
-[assembly: AssemblyConfiguration("Release")]
-#endif
-
-
+[assembly: AssemblyTitle("RpcFacilityStressTest")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Castle.Zmq")]
-[assembly: AssemblyCopyright("Copyright © Castle Project contributors 2014")]
+[assembly: AssemblyProduct("RpcFacilityStressTest")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4de7a851-efb7-408a-a3b5-59e4914bcf37")]
+[assembly: Guid("6091b807-bc12-4823-a382-0d0ff882f9b3")]
 
 // Version information for an assembly consists of the following four values:
 //
