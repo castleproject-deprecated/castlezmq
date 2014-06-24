@@ -26,5 +26,40 @@
 			ReflectionUtils.IsCollectionType(typeof(string[])).Should().BeTrue();
 			ReflectionUtils.IsCollectionType(typeof(IList)).Should().BeTrue();
 		}
+
+		[Test]
+		public void NormalizeToArray_for_arrays()
+		{
+			var res = ReflectionUtils.NormalizeToArray(new [] {"1", "2"}, typeof (string[]));
+			res.Should().BeOfType<string[]>();
+		}
+
+		[Test]
+		public void NormalizeToArray_for_lists()
+		{
+			var res = ReflectionUtils.NormalizeToArray(new ArrayList(new[] { "1", "2" }), typeof(ArrayList));
+			res.Should().BeOfType<object[]>();
+		}
+
+		[Test]
+		public void MakeStronglyTypedArray_for_primitives()
+		{
+			var res = ReflectionUtils.MakeStronglyTypedArray(typeof (int), new ArrayList(new[] {1, 2, 3}));
+			res.Should().BeOfType<int[]>();
+		}
+
+		[Test]
+		public void MakeStronglyTypedArray_for_non_primitives()
+		{
+			var res = ReflectionUtils.MakeStronglyTypedArray(typeof(string), new ArrayList(new[] { "1", "2", "3" }));
+			res.Should().BeOfType<string[]>();
+		}
+
+		[Test]
+		public void MakeStronglyTypedEnumerable()
+		{
+			var res = ReflectionUtils.MakeStronglyTypedEnumerable(typeof(int), new ArrayList(new[] { 1, 2, 3 }));
+			res.Should().BeAssignableTo<IList<int>>();
+		}
 	}
 }

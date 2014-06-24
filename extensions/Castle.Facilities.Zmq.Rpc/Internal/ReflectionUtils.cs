@@ -41,26 +41,36 @@ namespace Castle.Facilities.Zmq.Rpc.Internal
 				return (object[]) collection;
 			}
 
-			if (collType.IsGenericType && collType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-			{
-				var items = (IEnumerable) collection;
-				var newArray = new ArrayList();
-				foreach (var item in items) newArray.Add(item);
+			// We assume this check was already performed by the caller
+			// if (collType.IsGenericType && collType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+
+			var items = (IEnumerable) collection;
+			var newArray = new ArrayList();
+			foreach (var item in items) newArray.Add(item);
 				
-				return newArray.ToArray();
-			}
-
-			throw new ArgumentException("Unsupported collection type " + collType);
+			return newArray.ToArray();
 		}
 
-		public static Array MakeStronglyTypedArray()
+		public static Array MakeStronglyTypedArray(Type itemType, IList items)
 		{
-			throw new NotImplementedException();
+			var array = Array.CreateInstance(itemType, items.Count);
+			
+			for (int i = 0; i < items.Count; i++)
+				array.SetValue( items[i], i );
+
+			return array;
 		}
 
-		public static IEnumerable MakeStronglyTypedEnumerable()
+		public static object MakeStronglyTypedEnumerable(Type itemType, IList items)
 		{
-			throw new NotImplementedException();
+			var listType = typeof(List<>).MakeGenericType(itemType);
+			var list = Activator.CreateInstance(listType, new object[] { items.Count });
+
+			var addMethod = listType.GetMethod("Add");
+			for (int i = 0; i < items.Count; i++)
+				addMethod.Invoke(list, new[] { items[i] });
+
+			return list;
 		}
 	}
 }
