@@ -45,6 +45,7 @@
 			var result = req.Invoke(TestHostName, TestService, "method", 
 									new object[0], Type.EmptyTypes, typeof (void));
 
+			socket.ConnectedToEndpoint.Should().Be("endpoint1"); 
 			result.Should().BeNull();
 		}
 
@@ -67,6 +68,28 @@
 									new object[0], Type.EmptyTypes, typeof(string));
 
 			result.Should().Be("hello");
+		}
+
+		[Test]
+		public void Invoke_sends_request_and_restore_exception()
+		{
+			StubSocket socket = null;
+
+			_context = new StubContext(type =>
+			{
+				socket = new StubSocket(type);
+				socket.ToRecv.Add(Builder.SerializeResponse(Builder.BuildResponse(new Exception("for testing"))));
+				return socket;
+			});
+
+			var req = new RemoteRequestService(_context, _registry, _serialization);
+
+			Assert.Throws<Exception>(() =>
+			{
+				var result = req.Invoke(TestHostName, TestService, "method",
+					new object[0], Type.EmptyTypes, typeof (string));
+
+			}).Message.Should().Be("Remote server or invoker threw Exception with message for testing");
 		}
 	}
 }
