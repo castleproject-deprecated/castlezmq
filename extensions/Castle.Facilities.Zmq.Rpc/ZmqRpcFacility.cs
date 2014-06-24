@@ -3,6 +3,7 @@
 	using System;
 	using System.Linq;
 	using Castle.Facilities.Startable;
+	using Castle.Facilities.Zmq.Rpc.Internal;
 	using Castle.Facilities.Zmq.Rpc.Remote;
 	using Castle.MicroKernel.Facilities;
 	using Castle.MicroKernel.Registration;
@@ -29,10 +30,19 @@
 
 			this._cleaner = this.Kernel.Resolve<ZmqRpcCleaner>();
 
-			_isServer = !(String.IsNullOrEmpty(base.FacilityConfig.Attributes["listen"]));
+			this._isServer = !(String.IsNullOrEmpty(base.FacilityConfig.Attributes["listen"]));
 
 			// PerfCounters.setIsEnabled ( StringComparer.OrdinalIgnoreCase.Equals("true", base.FacilityConfig.Attributes.["usePerfCounter"]) )
 
+			if (this._isServer)
+			{
+				this.SetUpServer();
+			}
+
+			if (base.FacilityConfig.Children["endpoints"] != null)
+			{
+				this.SetUpClient();
+			}
 		}
 
 		protected override void Dispose()
@@ -44,18 +54,15 @@
 				_cleaner.CleanUp();
 			}
 		}
+
+		private void SetUpClient()
+		{
+
+		}
+
+		private void SetUpServer()
+		{
+
+		}
     }
-
-
-	public class ZmqRpcCleaner 
-	{
-		public ZmqRpcCleaner()
-		{
-		}
-
-		public void CleanUp()
-		{
-			
-		}
-	}
 }

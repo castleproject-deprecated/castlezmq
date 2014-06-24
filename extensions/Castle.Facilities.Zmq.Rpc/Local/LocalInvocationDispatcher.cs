@@ -1,7 +1,8 @@
-namespace Castle.Facilities.Zmq.Rpc
+namespace Castle.Facilities.Zmq.Rpc.Local
 {
 	using System;
 	using System.Reflection;
+	using Castle.Facilities.Zmq.Rpc.Internal;
 	using Castle.Zmq.Rpc.Model;
 
 	public class LocalInvocationDispatcher
@@ -17,16 +18,17 @@ namespace Castle.Facilities.Zmq.Rpc
 		{
 			var instance = _resolver(service);
 
-			var method = ResolveMethod(instance.GetType(), methodName, pInfo);
+			var paramTypes = Serialization.DeserializeParameterTypes(pInfo);
+			var method = ResolveMethod(instance.GetType(), methodName, paramTypes);
 
-			var args = Serialization.DeserializeParameters(parameters);
+			var args = Builder.ParamTupleToObjects(parameters, paramTypes);
 
 			var result = method.Invoke(instance, args);
 
 			return Tuple.Create(result, method.ReturnType);
 		}
 
-		private MethodInfo ResolveMethod(Type type, string method, string[] paramTypes)
+		private MethodInfo ResolveMethod(Type targeType, string methodName, Type[] paramTypes)
 		{
 			throw new NotImplementedException();
 		}

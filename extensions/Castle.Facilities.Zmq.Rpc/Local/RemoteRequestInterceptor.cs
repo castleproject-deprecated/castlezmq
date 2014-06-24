@@ -4,6 +4,7 @@ namespace Castle.Facilities.Zmq.Rpc
 	using System.Collections.Concurrent;
 	using System.Linq;
 	using Castle.DynamicProxy;
+	using Castle.Facilities.Zmq.Rpc.Internal;
 	using Castle.Facilities.Zmq.Rpc.Remote;
 	using Castle.Zmq;
 	using Castle.Zmq.Rpc.Model;
@@ -39,8 +40,8 @@ namespace Castle.Facilities.Zmq.Rpc
 				var parameters = m.GetParameters();
 				var parametersTypes = parameters.Select(p => p.ParameterType).ToArray();
 
-				var serializedArs = Serialization.SerializeParameters(invocation.Arguments, parametersTypes);
-				var serializedPInfo = Serialization.SerializeParameterInfo(parametersTypes);
+				var serializedArs = Builder.ParametersToParamTuple(invocation.Arguments, parametersTypes);
+				var serializedPInfo = Serialization.SerializeParameterTypes(parametersTypes);
 
 				var requestMessage = new RequestMessage(service, m.Name, serializedArs, serializedPInfo);
 

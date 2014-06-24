@@ -1,5 +1,7 @@
 ﻿namespace Castle.Facilities.Zmq.Rpc.Remote
 {
+	using System;
+	using Castle.Facilities.Zmq.Rpc.Internal;
 	using Castle.Zmq;
 	using Castle.Zmq.Extensions;
 	using Castle.Zmq.Rpc.Model;
@@ -17,11 +19,12 @@
 
 		protected override void SendRequest(IZmqSocket socket)
 		{
-			socket.Send(Serialization.SerializeRequest(_requestMessage));
+			socket.Send(Builder.SerializeRequest(_requestMessage));
 		}
 
 		protected override ResponseMessage GetReply(IZmqSocket socket)
 		{
+			throw new NotImplementedException();
 			socket.Recv();
 		}
 	}

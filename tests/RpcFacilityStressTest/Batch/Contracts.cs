@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
-	using Castle.Facilities.Zmq.Rpc;
 	using Castle.Zmq.Rpc;
 	using ProtoBuf;
 

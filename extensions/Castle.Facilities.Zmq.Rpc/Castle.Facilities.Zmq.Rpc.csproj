@@ -48,15 +48,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LocalInvocationDispatcher.cs" />
-    <Compile Include="RemoteRequestInterceptor.cs" />
+    <Compile Include="Internal\Builder.cs" />
+    <Compile Include="Local\LocalInvocationDispatcher.cs" />
+    <Compile Include="Local\RemoteRequestInterceptor.cs" />
     <Compile Include="Remote\RemoteEndpointRegistry.cs" />
     <Compile Include="Remote\RemoteRequest.cs" />
     <Compile Include="Remote\RemoteRequestListener.cs" />
+    <Compile Include="Internal\ZmqRpcCleaner.cs" />
     <Compile Include="ZmqRpcFacility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RemoteRequestInspector.cs" />
-    <Compile Include="Serialization.cs" />
+    <Compile Include="Local\RemoteRequestInspector.cs" />
+    <Compile Include="Internal\Serialization.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

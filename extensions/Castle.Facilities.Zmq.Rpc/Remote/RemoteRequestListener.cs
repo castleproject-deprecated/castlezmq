@@ -4,6 +4,8 @@
 	using System.Reflection;
 	using System.Threading;
 	using Castle.Core;
+	using Castle.Facilities.Zmq.Rpc.Internal;
+	using Castle.Facilities.Zmq.Rpc.Local;
 	using Castle.Zmq;
 	using Castle.Zmq.Extensions;
 	using Castle.Zmq.Rpc.Model;
@@ -53,7 +55,7 @@
 
 			ResponseMessage response = InternalDispatch(reqMessage);
 
-			var buffer = Serialization.SerializeResponse(response);
+			var buffer = Builder.SerializeResponse(response);
 			socket.Send(buffer);
 		}
 
@@ -67,16 +69,16 @@
 						reqMessage.TargetMethod,
 						reqMessage.Params, reqMessage.ParamTypes);
 
-				response = Serialization.BuildResponse(result);
+				response = Builder.BuildResponse(result);
 			}
 			catch (TargetInvocationException ex)
 			{
 				var e = ex.InnerException;
-				response = Serialization.BuildResponse(e);
+				response = Builder.BuildResponse(e);
 			}
 			catch (Exception ex)
 			{
-				response = Serialization.BuildResponse(ex);
+				response = Builder.BuildResponse(ex);
 			}
 			return response;
 		}
