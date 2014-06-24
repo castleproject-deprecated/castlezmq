@@ -54,29 +54,39 @@
 		{
 		}
 
-		public ExceptionInfo(string typename, string message)
+		public ExceptionInfo(string typename, string message, string stack = null)
 		{
 			Typename = typename;
 			Message = message;
+			Stack = stack;
 		}
 
 		[ProtoMember(1)]
 		public string Typename { get; set; }
 		[ProtoMember(2)]
 		public string Message { get; set; }
+		[ProtoMember(2)]
+		public string Stack { get; set; }
 	}
 
 	[ProtoContract(SkipConstructor = true)]
 	public class ResponseMessage
 	{
+		public static ResponseMessage Empty = new ResponseMessage();
+
 		public ResponseMessage()
 		{
 		}
 
-		public ResponseMessage(byte[] returnValue, string returnValueType, ExceptionInfo exceptionInfo)
+		public ResponseMessage(byte[] returnValue, string returnValueType)
 		{
 			ReturnValue = returnValue;
 			ReturnValueType = returnValueType;
+		}
+
+		public ResponseMessage(byte[] returnValue, string returnValueType, ExceptionInfo exceptionInfo)
+			: this(returnValue, returnValueType)
+		{
 			ExceptionInfo = exceptionInfo;
 		}
 
@@ -86,6 +96,8 @@
 		public byte[] ReturnValue { get; set; }
 		[ProtoMember(3)]
 		public string ReturnValueType { get; set; }
+
+		
 	}
 
 

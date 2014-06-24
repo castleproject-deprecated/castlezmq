@@ -51,7 +51,7 @@
 
 		private void OnRequestReceived(byte[] message, IZmqSocket socket)
 		{
-			var reqMessage = Serialization.DeserializeRequest(message);
+			var reqMessage = Builder.DeserializeRequest(message);
 
 			ResponseMessage response = InternalDispatch(reqMessage);
 

@@ -4,23 +4,18 @@ namespace Castle.Facilities.Zmq.Rpc
 	using System.Collections.Concurrent;
 	using System.Linq;
 	using Castle.DynamicProxy;
-	using Castle.Facilities.Zmq.Rpc.Internal;
-	using Castle.Facilities.Zmq.Rpc.Remote;
-	using Castle.Zmq;
-	using Castle.Zmq.Rpc.Model;
+
 
 	public class RemoteRequestInterceptor : IInterceptor
 	{
 		internal static ConcurrentDictionary<string, Type> Typename2Type =
 			new ConcurrentDictionary<string, Type>(StringComparer.Ordinal);
 
-		private readonly IZmqContext _context;
-		private readonly RemoteEndpointRegistry _endpointRegistry;
+		private readonly RemoteRequestService _remoteRequestService;
 
-		public RemoteRequestInterceptor(IZmqContext context, RemoteEndpointRegistry endpointRegistry)
+		public RemoteRequestInterceptor(RemoteRequestService remoteRequestService)
 		{
-			this._context = context;
-			_endpointRegistry = endpointRegistry;
+			this._remoteRequestService = remoteRequestService;
 		}
 
 		public void Intercept(IInvocation invocation)
@@ -34,31 +29,17 @@ namespace Castle.Facilities.Zmq.Rpc
 				var m = invocation.Method;
 
 				var asm = invocation.Method.DeclaringType.Assembly;
-				var service = m.DeclaringType.DeclaringType.AssemblyQualifiedName;
-				var endpoint = _endpointRegistry.GetEndpoint(asm);
+				var asmName = asm.GetName().Name;
 
+				var service = m.DeclaringType.DeclaringType.AssemblyQualifiedName;
 				var parameters = m.GetParameters();
 				var parametersTypes = parameters.Select(p => p.ParameterType).ToArray();
 
-				var serializedArs = Builder.ParametersToParamTuple(invocation.Arguments, parametersTypes);
-				var serializedPInfo = Serialization.SerializeParameterTypes(parametersTypes);
+				object retValue = 
+					this._remoteRequestService.Invoke(asmName, 
+							service, m.Name, invocation.Arguments, parametersTypes, m.ReturnType);
 
-				var requestMessage = new RequestMessage(service, m.Name, serializedArs, serializedPInfo);
-
-				var request = new RemoteRequest(_context, endpoint, requestMessage);
-				var response = request.Get();
-
-				if (response.ExceptionInfo != null)
-				{
-					var msg = "Remote server threw " + response.ExceptionInfo.Typename + " with message " +
-					          response.ExceptionInfo.Message;
-					throw new Exception(msg);
-				}
-
-				if (m.ReturnType != typeof (void))
-				{
-					invocation.ReturnValue = Serialization.DeserializeResponse(response, m.ReturnType);
-				}
+				invocation.ReturnValue = retValue;
 			}
 		}
 	}

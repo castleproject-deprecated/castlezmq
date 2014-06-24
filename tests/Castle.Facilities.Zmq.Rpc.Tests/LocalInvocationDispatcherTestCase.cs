@@ -17,7 +17,7 @@
 			{
 				if (service == serviceName) return new StubService();
 				throw new Exception("service not found");
-			});
+			}, new ProtoBufSerializationStrategy());
 
 			var result = dispatcher.Dispatch(serviceName, "Operation1", new ParamTuple[0], new string[0]);
 

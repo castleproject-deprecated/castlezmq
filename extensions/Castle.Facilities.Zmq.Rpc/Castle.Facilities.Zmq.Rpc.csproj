@@ -49,8 +49,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Internal\Builder.cs" />
+    <Compile Include="Internal\ReflectionUtils.cs" />
+    <Compile Include="Internal\TypeShortnameLookup.cs" />
     <Compile Include="Local\LocalInvocationDispatcher.cs" />
+    <Compile Include="Local\RemoteRequestService.cs" />
+    <Compile Include="ProtoBufSerializationStrategy.cs" />
     <Compile Include="Local\RemoteRequestInterceptor.cs" />
+    <Compile Include="SerializationStrategy.cs" />
     <Compile Include="Remote\RemoteEndpointRegistry.cs" />
     <Compile Include="Remote\RemoteRequest.cs" />
     <Compile Include="Remote\RemoteRequestListener.cs" />

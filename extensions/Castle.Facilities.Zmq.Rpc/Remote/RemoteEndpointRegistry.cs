@@ -38,9 +38,14 @@
 
 		public string GetEndpoint(Assembly asm)
 		{
+			// TODO: isnt this faster than getName)?
 			var full = asm.FullName;
-			var name = asm.GetName().Name;
 
+			return GetEndpoint(asm.GetName().Name);
+		}
+
+		public string GetEndpoint(string name)
+		{
 			var overriden = (string) CallContext.GetData("0mq.facility.endpoint");
 
 			if (!string.IsNullOrEmpty(overriden))

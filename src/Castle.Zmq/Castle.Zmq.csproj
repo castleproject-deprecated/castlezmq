@@ -86,6 +86,7 @@
     <Compile Include="Socket.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="SocketExtensions.cs" />
+    <Compile Include="Stubs\StubContext.cs" />
     <Compile Include="Stubs\StubSocket.cs" />
     <Compile Include="ZmqException.cs" />
   </ItemGroup>

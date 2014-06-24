@@ -24,6 +24,7 @@
 					Component.For<Castle.Zmq.Context>().Forward<Castle.Zmq.IZmqContext>(),
 					Component.For<RemoteEndpointRegistry>(),
 					Component.For<ZmqRpcCleaner>(),
+					Component.For<SerializationStrategy>().ImplementedBy<ProtoBufSerializationStrategy>(),
 					Component.For<RemoteRequestInterceptor>().LifeStyle.Transient
 				);
 			Kernel.ComponentModelBuilder.AddContributor(new RemoteRequestInspector());

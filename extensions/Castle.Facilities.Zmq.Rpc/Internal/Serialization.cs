@@ -1,13 +1,42 @@
 ﻿namespace Castle.Facilities.Zmq.Rpc.Internal
 {
 	using System;
+	using System.Collections;
 	using System.IO;
 	using Castle.Zmq.Rpc.Model;
 
 
 	internal static class Serialization
 	{
-		private static byte[] EmptyBuffer = new byte[0];
+		private static readonly byte[] EmptyBuffer = new byte[0];
+
+
+		public static byte[] Serialize<T>(T instance)
+		{
+			var stream = new MemoryStream();
+			ProtoBuf.Serializer.Serialize(stream, instance);
+			return InternalSliceBuffer(stream.GetBuffer(), (int)stream.Length);
+		}
+
+		public static T Deserialize<T>(byte[] buffer)
+		{
+			var stream = new MemoryStream(buffer);
+			return ProtoBuf.Serializer.Deserialize<T>(stream);
+		}
+
+		public static byte[] SerializeArray<T>(T[] elements)
+		{
+			var stream = new MemoryStream();
+			ProtoBuf.Meta.RuntimeTypeModel.Default.Serialize(stream, elements);
+			return InternalSliceBuffer(stream.GetBuffer(), (int) stream.Length);
+		}
+
+		public static IList DeserializeArray(byte[] buffer, Type collType)
+		{
+			var stream = new MemoryStream(buffer);
+			var res = ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, collType);
+			return (IList) res;
+		}
 
 		public static string[] SerializeParameterTypes(Type[] parametersTypes)
 		{
@@ -37,14 +66,36 @@
 			return types;
 		}
 
-		public static object DeserializeResponse(ResponseMessage response, Type returnType)
+		public static object DeserializeResponseValue(ResponseMessage response, Type returnType)
 		{
-			throw new NotImplementedException();
-		}
+			if (response == null) return null;
+			if (returnType == typeof (void)) return null;
 
-		public static RequestMessage DeserializeRequest(byte[] message)
-		{
-			throw new NotImplementedException();
+			if (ReflectionUtils.IsCollectionType(returnType))
+			{
+				var items = DeserializeArray(response.ReturnValue, returnType);
+
+				if (returnType.IsArray)
+				{
+					// not strongly typed array
+					if (returnType.GetElementType() == typeof (object))
+					{
+						return items;
+					}
+
+					return ReflectionUtils.MakeStronglyTypedArray(returnType.GetElementType(), items);
+				}
+				
+				// Some other type of collection
+
+				var itemType = returnType.GetGenericArguments()[0];
+
+				return ReflectionUtils.MakeStronglyTypedEnumerable(itemType, items);
+			}
+
+			var paramTuple = new ParamTuple(response.ReturnValue, response.ReturnValueType);
+
+			return DeserializeParamTuple(paramTuple, returnType);
 		}
 
 		public static ParamTuple BuildParamTuple(Type type, object value)
@@ -160,8 +211,6 @@
 			return smallerBuffer;
 		}
 
-
-
 		// protobuf-net doesnt deal with arraysegments yet
 
 //		private static ArraySegment<byte> InternalSliceBuffer(byte[] originalBuffer, int length)
@@ -170,5 +219,6 @@
 //				return new ArraySegment<byte>(originalBuffer);
 //			return new ArraySegment<byte>(originalBuffer, 0, length);
 //		}
+		
 	}
 }

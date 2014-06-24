@@ -58,7 +58,12 @@
   <ItemGroup>
     <Compile Include="LocalInvocationDispatcherTestCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReflectionUtilsTestCase.cs" />
     <Compile Include="RemoteEndpointRegistryTestCase.cs" />
+    <Compile Include="RemoteRequestServiceTestCase.cs" />
+    <Compile Include="Serialization\ArraySerializationTestCase.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Serialization\BuilderTestCase.cs" />
     <Compile Include="Serialization\ParameterSerializationTestCase.cs" />
   </ItemGroup>
@@ -73,6 +78,10 @@
     <ProjectReference Include="..\..\extensions\Castle.Zmq.Rpc\Castle.Zmq.Rpc.csproj">
       <Project>{8585F472-0039-4F9A-A57D-63BB6CDF97C4}</Project>
       <Name>Castle.Zmq.Rpc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Castle.Zmq\Castle.Zmq.csproj">
+      <Project>{8A7E293C-909D-4DE9-A601-F4B817A1B419}</Project>
+      <Name>Castle.Zmq</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
