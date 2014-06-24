@@ -31,7 +31,7 @@ namespace Castle.Facilities.Zmq.Rpc
 				var asm = invocation.Method.DeclaringType.Assembly;
 				var asmName = asm.GetName().Name;
 
-				var service = m.DeclaringType.DeclaringType.AssemblyQualifiedName;
+				var service = m.DeclaringType.AssemblyQualifiedName;
 				var parameters = m.GetParameters();
 				var parametersTypes = parameters.Select(p => p.ParameterType).ToArray();
 

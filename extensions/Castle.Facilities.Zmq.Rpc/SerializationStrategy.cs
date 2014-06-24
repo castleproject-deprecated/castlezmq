@@ -16,5 +16,7 @@ namespace Castle.Facilities.Zmq.Rpc
 
 		public abstract byte[] SerializeResponse(ResponseMessage response);
 		public abstract ResponseMessage DeserializeResponse(byte[] buffer);
+
+		public abstract object DeserializeResponseValue(ResponseMessage response, Type retType);
 	}
 }

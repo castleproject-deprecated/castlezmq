@@ -65,6 +65,8 @@ namespace Castle.Zmq.Extensions
 
 		protected override void DoDispose()
 		{
+			base.DoDispose();
+
 			_running = false;
 		}
 	}

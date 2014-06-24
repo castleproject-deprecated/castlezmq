@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections;
 	using System.IO;
+	using Castle.MicroKernel.Registration;
 	using Castle.Zmq.Rpc.Model;
 
 
@@ -54,6 +55,8 @@
 
 		public static Type[] DeserializeParameterTypes(string[] typeNames)
 		{
+			if (typeNames == null || typeNames.Length == 0) return Type.EmptyTypes;
+
 			// not using linq on purpose
 
 			var types = new Type[typeNames.Length];
@@ -181,6 +184,18 @@
 
 			if (expectedType == typeof(Guid))
 				return Guid.Parse((string)res);
+
+			if (expectedType == typeof(Byte))
+				return Convert.ToByte((string)res);
+
+			if (expectedType == typeof(SByte))
+				return Convert.ToSByte((string)res);
+
+			if (expectedType == typeof(bool))
+				return Convert.ToBoolean((string)res);
+
+			if (expectedType.IsEnum)
+				return Enum.Parse(expectedType, (string) res);
 
 			if (expectedType == typeof (DateTime))
 			{

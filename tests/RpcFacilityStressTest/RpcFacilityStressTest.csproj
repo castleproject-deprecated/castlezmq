@@ -87,6 +87,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\extensions\Castle.Facilities.Zmq.Rpc\Castle.Facilities.Zmq.Rpc.csproj">
+      <Project>{d9f5281f-9163-45ff-a27a-a9d54c82da84}</Project>
+      <Name>Castle.Facilities.Zmq.Rpc</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\extensions\Castle.Zmq.Rpc\Castle.Zmq.Rpc.csproj">
       <Project>{8585f472-0039-4f9a-a57d-63bb6cdf97c4}</Project>
       <Name>Castle.Zmq.Rpc</Name>

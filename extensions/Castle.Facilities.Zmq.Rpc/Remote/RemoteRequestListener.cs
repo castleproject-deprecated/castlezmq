@@ -24,17 +24,21 @@
 		private readonly string _endpoint;
 		private readonly int _workers;
 		private readonly LocalInvocationDispatcher _dispatcher;
+		private readonly SerializationStrategy _serializationStrategy;
 
 		private WorkerPool _workerPool;
 
 		private readonly string _localEndpoint;
 
-		public RemoteRequestListener(IZmqContext context, string endpoint, int workers, LocalInvocationDispatcher dispatcher)
+		public RemoteRequestListener(IZmqContext context, string endpoint, int workers, 
+									 LocalInvocationDispatcher dispatcher, 
+									 SerializationStrategy serializationStrategy)
 		{
 			this._context = context;
 			this._endpoint = endpoint;
 			this._workers = workers;
 			this._dispatcher = dispatcher;
+			this._serializationStrategy = serializationStrategy;
 
 			var count = Interlocked.Increment(ref localAddUseCounter);
 			this._localEndpoint = "inproc://rrworker_" + count;
@@ -44,18 +48,28 @@
 		{
 			this.Stop();
 
-			this._workerPool = new WorkerPool(_context, 
+			this._workerPool = new WorkerPool(this._context, 
 											  this._endpoint, this._localEndpoint, 
-											  OnRequestReceived, _workers);
+											  this.OnRequestReceived, this._workers);
+			this._workerPool.Start();
+		}
+
+		public void Stop()
+		{
+			if (_workerPool != null)
+			{
+				_workerPool.Dispose();
+				_workerPool = null;
+			}
 		}
 
 		private void OnRequestReceived(byte[] message, IZmqSocket socket)
 		{
-			var reqMessage = Builder.DeserializeRequest(message);
+			var reqMessage = _serializationStrategy.DeserializeRequest(message);
 
 			ResponseMessage response = InternalDispatch(reqMessage);
 
-			var buffer = Builder.SerializeResponse(response);
+			var buffer = _serializationStrategy.SerializeResponse(response);
 			socket.Send(buffer);
 		}
 
@@ -83,18 +97,6 @@
 			return response;
 		}
 
-		public void Stop()
-		{
-			if (_workerPool != null)
-			{
-				_workerPool.Dispose();
-				_workerPool = null;
-			}
-		}
-
-		public void Dispose()
-		{
-			this.Stop();
-		}
+		
 	}
 }

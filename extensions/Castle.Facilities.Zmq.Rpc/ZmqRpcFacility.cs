@@ -4,6 +4,7 @@
 	using System.Linq;
 	using Castle.Facilities.Startable;
 	using Castle.Facilities.Zmq.Rpc.Internal;
+	using Castle.Facilities.Zmq.Rpc.Local;
 	using Castle.Facilities.Zmq.Rpc.Remote;
 	using Castle.MicroKernel.Facilities;
 	using Castle.MicroKernel.Registration;
@@ -22,14 +23,14 @@
 
 			this.Kernel.Register(
 					Component.For<Castle.Zmq.Context>().Forward<Castle.Zmq.IZmqContext>(),
-					Component.For<RemoteEndpointRegistry>(),
-					Component.For<ZmqRpcCleaner>(),
 					Component.For<SerializationStrategy>().ImplementedBy<ProtoBufSerializationStrategy>(),
+					Component.For<RemoteEndpointRegistry>(),
+					Component.For<RemoteRequestService>(),
+					Component.For<ZmqRpcCleaner>(),
+					Component.For<LocalInvocationDispatcher>(),
 					Component.For<RemoteRequestInterceptor>().LifeStyle.Transient
 				);
 			Kernel.ComponentModelBuilder.AddContributor(new RemoteRequestInspector());
-
-			this._cleaner = this.Kernel.Resolve<ZmqRpcCleaner>();
 
 			this._isServer = !(String.IsNullOrEmpty(base.FacilityConfig.Attributes["listen"]));
 
@@ -44,6 +45,8 @@
 			{
 				this.SetUpClient();
 			}
+
+			this._cleaner = this.Kernel.Resolve<ZmqRpcCleaner>();
 		}
 
 		protected override void Dispose()
@@ -58,12 +61,20 @@
 
 		private void SetUpClient()
 		{
-
+			var router = base.Kernel.Resolve<RemoteEndpointRegistry>();
+			router.ParseEndpoints(base.FacilityConfig.Children["endpoints"]);
 		}
 
 		private void SetUpServer()
 		{
+			var listeningEndpoint = base.FacilityConfig.Attributes["listen"];
+			var workers = base.FacilityConfig.Attributes["wokers"] ?? "3";
 
+			this.Kernel.Register(
+						Component.For<RemoteRequestListener>().Parameters(
+								Parameter.ForKey("endpoint").Eq(listeningEndpoint),
+                                Parameter.ForKey("workers").Eq(workers))
+				);
 		}
     }
 }

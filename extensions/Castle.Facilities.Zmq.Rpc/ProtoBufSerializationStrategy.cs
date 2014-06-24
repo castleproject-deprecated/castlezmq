@@ -45,5 +45,10 @@ namespace Castle.Facilities.Zmq.Rpc
 		{
 			return Builder.DeserializeResponse(buffer);
 		}
+
+		public override object DeserializeResponseValue(ResponseMessage response, Type retType)
+		{
+			return Serialization.DeserializeResponseValue(response, retType);
+		}
 	}
 }

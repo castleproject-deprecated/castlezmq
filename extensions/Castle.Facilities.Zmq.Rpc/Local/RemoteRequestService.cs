@@ -44,7 +44,7 @@ namespace Castle.Facilities.Zmq.Rpc
 
 			if (retType != typeof(void))
 			{
-				return Serialization.DeserializeResponseValue(response, retType);
+				return _serializationStrategy.DeserializeResponseValue(response, retType);
 			}
 
 			return null;

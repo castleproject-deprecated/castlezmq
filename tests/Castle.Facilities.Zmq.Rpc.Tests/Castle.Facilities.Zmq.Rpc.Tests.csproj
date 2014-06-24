@@ -64,7 +64,6 @@
     <Compile Include="Serialization\ArraySerializationTestCase.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Serialization\BuilderTestCase.cs" />
     <Compile Include="Serialization\ParameterSerializationTestCase.cs" />
   </ItemGroup>
   <ItemGroup>

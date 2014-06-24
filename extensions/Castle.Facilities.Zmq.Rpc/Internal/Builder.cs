@@ -61,6 +61,7 @@ namespace Castle.Facilities.Zmq.Rpc.Internal
 
 		public static ParamTuple[] ParametersToParamTuple(object[] arguments, Type[] parametersTypes)
 		{
+			if (arguments == null) return null;
 			if (parametersTypes.Length == 0) return null;
 
 			// Not using linq for perf reasons
@@ -69,7 +70,8 @@ namespace Castle.Facilities.Zmq.Rpc.Internal
 
 			for (int i = 0; i < retArray.Length; i++)
 			{
-				var pTuple = Serialization.BuildParamTuple(parametersTypes[i], arguments[i]);
+				// var pTuple = Serialization.BuildParamTuple(parametersTypes[i], arguments[i]);
+				var pTuple = Serialization.BuildParamTuple(arguments[i].GetType(), arguments[i]);
 				retArray[i] = pTuple;
 			}
 
@@ -78,7 +80,7 @@ namespace Castle.Facilities.Zmq.Rpc.Internal
 
 		public static object[] ParamTupleToObjects(ParamTuple[] parameters, Type[] parametersTypes)
 		{
-			if (parameters.Length == 0) return null;
+			if (parametersTypes.Length == 0) return null;
 
 			// Not using linq for perf reasons
 

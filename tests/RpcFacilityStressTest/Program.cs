@@ -8,6 +8,7 @@
 	using Castle.Windsor.Configuration.Interpreters;
 	using NUnit.Framework;
 
+
 	class Program
 	{
 		private static WindsorContainer _containerClient;
@@ -48,14 +49,14 @@
 			}
 			catch (Exception ex)
 			{
-				Assert.AreEqual("Remote server threw Exception with message simple message", ex.Message);
+				Assert.AreEqual("Remote server or invoker threw Exception with message simple message", ex.Message);
 			}
 
 			var watch = new System.Diagnostics.Stopwatch();
 			watch.Start();
 
 			// 1000
-			for (var i = 0; i < 1000000; i++)
+			for (var i = 0; i < 100; i++)
 			{
 				if (i % 1000 == 0)
 				{
@@ -70,7 +71,7 @@
 
 				service.NoParamsOrReturn();
 				service.JustParams("1");
-				service.JustReturn().Equals("abc");
+				Assert.IsTrue(service.JustReturn().Equals("abc"));
 				service.ParamsWithStruct(new MyCustomStruct() { Name = "1", Age = 30 });
 				service.ParamsWithCustomType1(new Impl1() { });
 				service.ParamsWithCustomType2(new Contract1Impl() { Name = "2", Age = 31 });
@@ -90,8 +91,6 @@
 				var array = service.UsingArray();
 				Assert.IsNotNull(array);
 				Assert.AreEqual(2, array.Length);
-
-				
 			}
 
 			watch.Stop();
