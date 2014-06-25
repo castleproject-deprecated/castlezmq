@@ -23,10 +23,24 @@
 			this._serializer = serializer;
 		}
 
+		/// <summary>
+		/// Publishes message without topic
+		/// </summary>
+		/// <param name="message"></param>
+		public void Publish(T message)
+		{
+			this.Publish(string.Empty, message);
+		}
+
+		/// <summary>
+		/// Publishes with a topic
+		/// </summary>
+		/// <param name="topic"></param>
+		/// <param name="message"></param>
 		public void Publish(string topic, T message)
 		{
 			EnsureNotDisposed();
-			if (this._started) throw new InvalidOperationException("Needs to be Started before publishing");
+			if (!this._started) throw new InvalidOperationException("Needs to be Started before publishing");
 			if (topic == null) throw new ArgumentNullException("topic");
 			if (message == null) throw new ArgumentNullException("message");
 
@@ -57,6 +71,7 @@
 		public virtual void Stop()
 		{
 			EnsureNotDisposed();
+
 			if (this._started)
 			{
 				this._socket.Unbind(this._endpoint);
