@@ -10,6 +10,7 @@
 		private IZmqSocket _socket;
 		private bool _started;
 		private volatile bool _disposed;
+		private readonly object _locker = new object();
 
 		protected BasePublisher(IZmqContext context, string endpoint, Func<T, byte[]> serializer)
 		{
@@ -31,8 +32,11 @@
 
 			var serialized = this._serializer(message);
 
-			this._socket.Send(topic, hasMoreToSend: true);
-			this._socket.Send(serialized);
+			lock (_locker)
+			{
+				this._socket.Send(topic, hasMoreToSend: true);
+				this._socket.Send(serialized);
+			}
 		}
 
 		public virtual void Start()
