@@ -25,7 +25,10 @@
 			// caching the ptr (which shouldnt change since they are unmanaged)
 			foreach (var pollItem in _items)
 			{
-				_ptr2Socket[pollItem.Item.socket] = pollItem._socket;
+				if (Environment.Is64BitProcess)
+					_ptr2Socket[pollItem.Item64.socket] = pollItem._socket;
+				else
+					_ptr2Socket[pollItem.Item32.socket] = pollItem._socket;
 			}
 		}
 
@@ -51,15 +54,33 @@
 
 		public void Poll(int timeout)
 		{
-			var items = _items.Select(i => i.Item).ToArray();
+			int res = 0;
 
-			var res = Native.Poll.zmq_poll(items, items.Length, timeout);
-
-			if (res == 0) return; // nothing happened
-
-			if (res > 0)
+			if (Environment.Is64BitProcess)
 			{
-				this.InternalFireEvents(items);
+				var items = _items.Select(i => i.Item64);
+				var array = items.ToArray();
+				res = Native.Poll.zmq_poll_x64(array, array.Length, timeout);
+
+				if (res == 0) return; // nothing happened
+
+				if (res > 0)
+				{
+					this.InternalFireEvents(array.Cast<Native.Poll.IZmq_pollitem>());
+				}
+			}
+			else
+			{
+				var items = _items.Select(i => i.Item32);
+				var array = items.ToArray();
+				res = Native.Poll.zmq_poll_x86(array, array.Length, timeout);
+
+				if (res == 0) return; // nothing happened
+
+				if (res > 0)
+				{
+					this.InternalFireEvents(array.Cast<Native.Poll.IZmq_pollitem>());
+				}
 			}
 	
 			if (res == Native.ErrorCode) Native.ThrowZmqError();
@@ -81,23 +102,24 @@
 			Poll(-1);
 		}
 
-		private void InternalFireEvents(Native.Poll.zmq_pollitem_t[] items)
+		private void InternalFireEvents(IEnumerable<Native.Poll.IZmq_pollitem> items)
 		{
 			bool hasRcv;
 			bool hasSend;
 
-			for (int i = 0; i < items.Length; i++)
+			// for (int i = 0; i < items.Length; i++)
+			foreach (var pollitem in items)
 			{
-				if (items[i].revents != 0)
+				if (pollitem.Revents != 0)
 				{
-					hasRcv = ((items[i].revents & Native.Poll.POLLIN) != 0);
-					hasSend = ((items[i].revents & Native.Poll.POLLOUT) != 0);
+					hasRcv = ((pollitem.Revents & Native.Poll.POLLIN) != 0);
+					hasSend = ((pollitem.Revents & Native.Poll.POLLOUT) != 0);
 
 					if (hasRcv || hasSend)
 					{
 						// get our socket given the pointer
 						Socket socket;
-						if (_ptr2Socket.TryGetValue(items[i].socket, out socket))
+						if (_ptr2Socket.TryGetValue(pollitem.Socket, out socket))
 						{
 							// fire the events
 							if (hasRcv)

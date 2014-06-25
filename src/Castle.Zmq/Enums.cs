@@ -52,7 +52,11 @@
 
 	public enum Transport
 	{
-		Tcp, Inproc
+		Tcp, 
+		Inproc,
+		Ipc, 
+		Pgm, 
+		Epgm
 	}
 
 	public enum SocketOpt

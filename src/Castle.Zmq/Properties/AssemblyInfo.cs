@@ -7,11 +7,11 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("Castle.Zmq")]
 
-#if x64
-[assembly: AssemblyDescription("Compiled with dependency on x64 libzmq")]
-#else 
-[assembly: AssemblyDescription("Compiled with dependency on x86/win32 libzmq")]
-#endif
+//#if x64
+//[assembly: AssemblyDescription("Compiled with dependency on x64 libzmq")]
+//#else 
+//[assembly: AssemblyDescription("Compiled with dependency on x86/win32 libzmq")]
+//#endif
 
 #if DEBUG
 [assembly: AssemblyConfiguration("Debug")]
@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Castle.Zmq")]
 [assembly: AssemblyCopyright("Copyright © Castle Project contributors 2014")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTrademark("LGPL license")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

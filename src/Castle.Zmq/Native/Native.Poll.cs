@@ -5,8 +5,17 @@
 
 	internal static partial class Native
 	{
+		
+
 		internal static class Poll
 		{
+			internal interface IZmq_pollitem
+			{
+				IntPtr Socket { get; }
+				Int16 Events { get; }
+				Int16 Revents { get; }
+			}
+
 			// poll for inbound messages
 			public const Int16 POLLIN = 1;
 
@@ -21,20 +30,37 @@
 			public const long FOREVER = -1L;
 
 			[StructLayout(LayoutKind.Sequential)]
-			public struct zmq_pollitem_t
+			public struct zmq_pollitem_t_x86 : IZmq_pollitem
 			{
 				public IntPtr socket;
-#if x64 
-				public long fd; 
-#else
 				public int fd; 
-#endif
- 				public Int16 events;
+				public Int16 events;
 				public Int16 revents;
+
+				public IntPtr Socket {get { return socket; }}
+				public Int16 Events { get { return events; } }
+				public Int16 Revents { get { return revents; } }
 			}
 
-			[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
-			public static extern int zmq_poll([In, Out] zmq_pollitem_t[] items, int count, long timeout);
+			[StructLayout(LayoutKind.Sequential)]
+			public struct zmq_pollitem_t_x64 : IZmq_pollitem
+			{
+				public IntPtr socket;
+				public long fd; 
+ 				public Int16 events;
+				public Int16 revents;
+
+				public IntPtr Socket { get { return socket; } }
+				public Int16 Events { get { return events; } }
+				public Int16 Revents { get { return revents; } }
+			}
+
+			[DllImport("libzmq", EntryPoint = "zmq_poll", CallingConvention = CallingConvention.Cdecl)]
+			public static extern int zmq_poll_x86([In, Out] zmq_pollitem_t_x86[] items, int count, long timeout);
+
+
+			[DllImport("libzmq", EntryPoint = "zmq_poll", CallingConvention = CallingConvention.Cdecl)]
+			public static extern int zmq_poll_x64([In, Out] zmq_pollitem_t_x64[] items, int count, long timeout);
 		}
 	}
 }

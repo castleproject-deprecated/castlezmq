@@ -21,7 +21,7 @@
 				using (var request = base.Context.Req())
 				using (var reply = base.Context.Rep())
 				{
-					reply.Bind(BackEndpoint);
+					reply.Connect(BackEndpoint);
 
 					request.Connect(FrontEndpoint);
 

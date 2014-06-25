@@ -9,6 +9,42 @@
 	/// </summary>
 	public static class SocketExtensions
 	{
+		public static void Connect(this IZmqSocket source, Transport transport, string address, uint port, int timeout = Socket.InfiniteTimeout)
+		{
+			var endpoint = BuildEndpoint(transport, address, port);
+
+			if (timeout != Socket.InfiniteTimeout)
+			{
+				source.SetOption(SocketOpt.RCVTIMEO, timeout);
+			}
+
+			source.Connect(endpoint);
+		}
+
+		public static void Disconnect(this IZmqSocket source, Transport transport, string address, uint port)
+		{
+			var endpoint = BuildEndpoint(transport, address, port);
+			source.Disconnect(endpoint);
+		}
+
+		public static void Bind(this IZmqSocket source, Transport transport, string address, uint port, int timeout = Socket.InfiniteTimeout)
+		{
+			var endpoint = BuildEndpoint(transport, address, port);
+
+			if (timeout != Socket.InfiniteTimeout)
+			{
+				source.SetOption(SocketOpt.RCVTIMEO, timeout);
+			}
+
+			source.Bind(endpoint);
+		}
+
+		public static void Unbind(this IZmqSocket source, Transport transport, string address, uint port)
+		{
+			var endpoint = BuildEndpoint(transport, address, port);
+			source.Unbind(endpoint);
+		}
+
 		/// <summary>
 		/// Returns true if the last message received has indicated 
 		/// that there's more to come (part of a multipart message). 
@@ -161,6 +197,19 @@
 			{
 				source.Unsubscribe(topic);
 			}
+		}
+
+		private static string BuildEndpoint(Transport transport, string address, uint port)
+		{
+			if (string.IsNullOrEmpty(address)) throw new ArgumentNullException("address");
+
+			// Note: For some transports (e.g. inproc), port doesnt make sense
+			if (transport != Transport.Inproc)
+			{
+				return string.Format("{0}://{1}:{2}", transport, address, port);
+			}
+
+			return string.Format("{0}://{1}", transport, address);
 		}
 	}
 }
