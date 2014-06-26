@@ -20,6 +20,8 @@
 			_endpoint = endpoint;
 			_requestMessage = requestMessage;
 			_serializationStrategy = serializationStrategy;
+
+			this.Timeout = 30 * 1000;
 		}
 
 		protected override void SendRequest(IZmqSocket socket)
