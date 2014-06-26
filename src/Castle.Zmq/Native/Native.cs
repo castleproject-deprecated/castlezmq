@@ -40,16 +40,18 @@
 		/// <summary>
 		/// Should be called when a native zmq function returns error (-1)
 		/// </summary>
-		public static void ThrowZmqError()
+		public static void ThrowZmqError(string context = null)
 		{
 			var error = Native.zmq_errno();
-			ThrowZmqError(error);
+			ThrowZmqError(error, context);
 		}
 
-		public static void ThrowZmqError(int error)
+		public static void ThrowZmqError(int error, string context = null)
 		{
 			var msg = LastErrorString(error);
-			throw new ZmqException(msg, error);
+			if (context == null)
+				throw new ZmqException(msg, error);
+			throw new ZmqException(msg + " in " + context, error);
 		}
 	}
 }

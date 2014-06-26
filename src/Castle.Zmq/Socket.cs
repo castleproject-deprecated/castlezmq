@@ -67,7 +67,7 @@
 			EnsureNotDisposed();
 
 			var res = Native.Socket.zmq_bind(this._socketPtr, endpoint);
-			if (res == Native.ErrorCode) Native.ThrowZmqError();
+			if (res == Native.ErrorCode) Native.ThrowZmqError("Binding " + endpoint);
 		}
 
 		public void Unbind(string endpoint)
@@ -76,7 +76,7 @@
 			EnsureNotDisposed();
 
 			var res = Native.Socket.zmq_unbind(this._socketPtr, endpoint);
-			if (res == Native.ErrorCode) Native.ThrowZmqError();
+			if (res == Native.ErrorCode) Native.ThrowZmqError("Unbinding " + endpoint);
 		}
 
 		public void Connect(string endpoint)
@@ -85,7 +85,7 @@
 			EnsureNotDisposed();
 
 			var res = Native.Socket.zmq_connect(this._socketPtr, endpoint);
-			if (res == Native.ErrorCode) Native.ThrowZmqError();
+			if (res == Native.ErrorCode) Native.ThrowZmqError("Connecting " + endpoint);
 		}
 
 		public void Disconnect(string endpoint)
@@ -94,7 +94,7 @@
 			EnsureNotDisposed();
 
 			var res = Native.Socket.zmq_disconnect(this._socketPtr, endpoint);
-			if (res == Native.ErrorCode) Native.ThrowZmqError();
+			if (res == Native.ErrorCode) Native.ThrowZmqError("Disonnecting " + endpoint);
 		}
 
 		#endregion
@@ -117,7 +117,7 @@
 						// not the end of the world
 						return null;
 					}
-					Native.ThrowZmqError(error);
+					Native.ThrowZmqError(error, "Recv");
 				}
 				else
 				{
@@ -142,7 +142,7 @@
 
 			// for now we're treating EAGAIN as error. 
 			// not sure that's OK
-			if (res == Native.ErrorCode) Native.ThrowZmqError();
+			if (res == Native.ErrorCode) Native.ThrowZmqError("Send");
 		}
 
 		/// <summary>
@@ -301,11 +301,11 @@
 				marshaller(bufPtr, value);
 
 				var res = Native.Socket.zmq_setsockopt(this._socketPtr, option, bufPtr, bufferSize);
-				if (!ignoreError && res == Native.ErrorCode) Native.ThrowZmqError();
+				if (!ignoreError && res == Native.ErrorCode) 
+					Native.ThrowZmqError("setting option " + option + " with value " + value);
 
 			}, bufferSize);
 		}
-
 
 		private object InternalGetOption(Type retType, int option)
 		{

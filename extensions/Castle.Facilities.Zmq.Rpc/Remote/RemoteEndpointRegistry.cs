@@ -24,6 +24,12 @@
 				if (asm == null) throw new ArgumentException("config is missing 'assembly' attribute");
 				if (endpoint == null) throw new ArgumentException("config is missing 'endpoint' attribute");
 
+				if (endpoint.IndexOf("://", StringComparison.Ordinal) == -1)
+				{
+					// defaults to tcp
+					endpoint = "tcp://" + endpoint;
+				}
+
 				this._endpoints[asm] = endpoint;
 			}
 		}

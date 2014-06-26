@@ -21,7 +21,7 @@
 			_service = new StubService();
 			_dispatcher = new LocalInvocationDispatcher(service =>
 			{
-				if (service == serviceName) return _service;
+				if (service == serviceName) return Tuple.Create<object,Type>(_service, _service.GetType());
 				throw new Exception("service not found");
 			}, new ProtoBufSerializationStrategy());
 		}
