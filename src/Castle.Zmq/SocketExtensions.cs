@@ -206,7 +206,7 @@
 			// Note: For some transports (e.g. inproc), port doesnt make sense
 			if (transport != Transport.Inproc)
 			{
-				return string.Format("{0}://{1}:{2}", transport, address, port);
+				return string.Format("{0}://{1}:{2}", transport.ToString().ToLowerInvariant(), address, port);
 			}
 
 			return string.Format("{0}://{1}", transport, address);
