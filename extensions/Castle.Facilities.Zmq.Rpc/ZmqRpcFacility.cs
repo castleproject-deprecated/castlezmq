@@ -70,6 +70,11 @@
 			var listeningEndpoint = base.FacilityConfig.Attributes["listen"];
 			var workers = base.FacilityConfig.Attributes["wokers"] ?? "3";
 
+			if (listeningEndpoint.IndexOf("://", StringComparison.Ordinal) == -1)
+			{
+				listeningEndpoint = "tcp://" + listeningEndpoint;
+			}
+
 			this.Kernel.Register(
 						Component.For<RemoteRequestListener>().Parameters(
 								Parameter.ForKey("endpoint").Eq(listeningEndpoint),
