@@ -1,7 +1,6 @@
 namespace Castle.Facilities.Zmq.Rpc
 {
 	using System;
-	using Castle.Facilities.Zmq.Rpc.Internal;
 	using Castle.Facilities.Zmq.Rpc.Remote;
 	using Castle.Zmq;
 	using Castle.Zmq.Rpc.Model;

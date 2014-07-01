@@ -96,9 +96,5 @@
 		public byte[] ReturnValue { get; set; }
 		[ProtoMember(3)]
 		public string ReturnValueType { get; set; }
-
-		
 	}
-
-
 }
