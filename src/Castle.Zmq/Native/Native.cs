@@ -8,6 +8,12 @@
 	{
 		#region Other stuff
 
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr LoadLibrary(string dllToLoad);
+
+        [DllImport("kernel32.dll")]
+        public static extern bool FreeLibrary(IntPtr hModule);
+        
 		[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int zmq_errno();
 

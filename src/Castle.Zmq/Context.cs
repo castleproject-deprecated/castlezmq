@@ -1,4 +1,7 @@
-﻿namespace Castle.Zmq
+﻿using System.IO;
+using System.IO.Compression;
+
+namespace Castle.Zmq
 {
 	using System;
 
@@ -14,7 +17,68 @@
 		public const int DefaultIoThreads = 1;
 		public const int DefaultMaxSockets = 1024;
 
-		/// <summary>
+	    static Context()
+	    {
+	        //EnsureZmqLibrary();
+	    }
+
+	    public static void EnsureZmqLibrary()
+	    {
+	        IntPtr libPtr = Native.LoadLibrary("libzmq");
+	        if (libPtr == IntPtr.Zero)
+	        {
+	            LoadEmbeddedLibary();
+	        }
+	    }
+
+	    private static void LoadEmbeddedLibary()
+	    {
+	        var bitnessPath = String.Format("x{0}", Environment.Is64BitProcess ? 64 : 86);
+
+	        var asm = typeof (Context).Assembly;
+            string resourceName = String.Format(
+                "Castle.Zmq.Native.lib.{0}.libzmq.dll.gz", 
+                bitnessPath);
+
+	        var dir = String.Format("castle-zmq-{0}", typeof(Context).Assembly.GetName().Version);
+
+	        dir = Path.Combine(Path.GetTempPath(), dir);
+	        dir = Path.Combine(dir, bitnessPath);
+
+            if(!Directory.Exists(dir))
+	            Directory.CreateDirectory(dir);
+
+	        var tempFile = Path.Combine(dir, "libzmq.dll");
+
+            // Try to delete and recreate, in case of file corruption
+	        if (File.Exists(tempFile))
+	        {
+	            try
+	            {
+                    File.Delete(tempFile);
+	            }
+	            catch{ } // Might be in use by another process; likely not corrupted
+	        }
+
+	        if (!File.Exists(tempFile)) // if delete was successful, create it
+	        {
+	            using (var stream = asm.GetManifestResourceStream(resourceName))
+	            using (var gzip = new GZipStream(stream, CompressionMode.Decompress))
+	            using (var file = File.Create(tempFile))
+	            {
+	                gzip.CopyTo(file);
+	                file.Flush(true);
+	            }
+	        }
+
+	        IntPtr libPtr = Native.LoadLibrary(tempFile);
+	        if (libPtr == IntPtr.Zero)
+	        {
+	            throw new InvalidOperationException("Unable to load libzmq.");
+	        }
+	    }
+
+	    /// <summary>
 		/// Creates a new context
 		/// </summary>
 		/// <param name="ioThreads">How many dedicated threds for IO operations</param>
