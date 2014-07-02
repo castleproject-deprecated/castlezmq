@@ -27,6 +27,21 @@
 
 		protected abstract void OnReceived(string topic, T message);
 
+		public void SubscribeToTopic(string topic)
+		{
+			if (topic == null) throw new ArgumentNullException("topic");
+			if (!_started) throw new InvalidOperationException("Cannot subscribe before starting it");
+
+			_socket.Subscribe(topic);
+		}
+		public void UnsubscribeFromTopic(string topic)
+		{
+			if (topic == null) throw new ArgumentNullException("topic");
+			if (!_started) throw new InvalidOperationException("Cannot unsubscribe before starting it");
+
+			_socket.Unsubscribe(topic);
+		}
+
 		public virtual void Start()
 		{
 			EnsureNotDisposed();
