@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Castle.Zmq</id>
+    <version>4.0.0</version>
+    <authors>Castle Project Contributors</authors>
+    <owners>Castle Project Contributors</owners>
+    <licenseUrl>https://www.gnu.org/licenses/lgpl.html</licenseUrl>
+    <projectUrl>https://github.com/castleproject/castlezmq</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Castle ZeroMQ Bindings</description>
+    <summary>Castle ZeroMQ Bindings</summary>
+    <copyright>Copyright 2004-2014 Castle Project - http://www.castleproject.org/</copyright>
+    <tags>castle zeromq zmq 0mq</tags>
+  </metadata>
+  <files>
+    <file src="..\LICENSE" />
+    <file src="..\build\Release\Castle.Zmq.dll" target="lib/net40" />
+    <file src="..\build\Release\Castle.Zmq.pdb" target="lib/net40" />
+    <!-- file src="..\build\Release\Castle.Zmq.xml" target="lib/net40" /-->
+  </files>
+</package>

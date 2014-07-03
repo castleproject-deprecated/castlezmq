@@ -68,6 +68,14 @@
     <Compile Include="Stubs\StubSocket.cs" />
     <Compile Include="ZmqException.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\lib\zeromq\x64\libzmq.dll.gz">
+      <Link>Native\lib\x64\libzmq.dll.gz</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\lib\zeromq\x86\libzmq.dll.gz">
+      <Link>Native\lib\x86\libzmq.dll.gz</Link>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
