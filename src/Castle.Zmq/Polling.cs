@@ -70,7 +70,7 @@
 
 		public void Poll(int timeout)
 		{
-//			try
+			try
 			{
 				int res = 0;
 
@@ -99,10 +99,12 @@
 
 				if (res == Native.ErrorCode) Native.ThrowZmqError();
 			}
-//			catch (SEHException zex) // rare, but may happen if the endpoint disconnects uncleanly
-//			{
-//				// TODO: log it
-//			}
+			catch (SEHException zex) // rare, but may happen if the endpoint disconnects uncleanly
+			{
+				var msg = "Error polling socket(s): " + Native.LastErrorString() + " Inner: " + zex.InnerException;
+				System.Diagnostics.Trace.TraceError(msg);
+				System.Diagnostics.Debug.WriteLine(msg);
+			}
 		}
 
 		/// <summary>
