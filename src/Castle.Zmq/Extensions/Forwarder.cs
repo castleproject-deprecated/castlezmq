@@ -13,7 +13,7 @@ namespace Castle.Zmq.Extensions
 			if (backend.SocketType != SocketType.XPub) throw new ArgumentException("Backend must be a XPub");
 		}
 
-		public Forwarder(Context ctx, string frontEndEndpoint, string backendEndpoint)
+		public Forwarder(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint)
 			: base(ctx, frontEndEndpoint, backendEndpoint, SocketType.XSub, SocketType.XPub)
 		{
 		}
