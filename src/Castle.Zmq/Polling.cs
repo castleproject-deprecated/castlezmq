@@ -3,7 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Runtime.ExceptionServices;
 	using System.Runtime.InteropServices;
+	using System.Security;
 
 	[Flags]
 	public enum PollingEvents
@@ -68,6 +70,7 @@
 		/// </summary>
 		public SocketEventDelegate SendReady;
 
+		[HandleProcessCorruptedStateExceptions, SecurityCritical]
 		public void Poll(int timeout)
 		{
 			try
