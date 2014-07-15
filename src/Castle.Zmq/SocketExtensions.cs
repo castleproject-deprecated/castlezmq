@@ -91,6 +91,16 @@
 			return encoding.GetString(buffer);
 		}
 
+		public static void Send(this IZmqSocket source, ArraySegment<byte> buffer, bool hasMoreToSend = false, bool noWait = false)
+		{
+			if (buffer == null) throw new ArgumentNullException("buffer");
+
+			var segment = new byte[buffer.Count];
+			Buffer.BlockCopy(buffer.Array, buffer.Offset, segment, 0, segment.Length);
+
+			source.Send(segment, hasMoreToSend, noWait);
+		}
+
 		/// <summary>
 		/// Sends the byte[] message and uses the specified flags to configure the sending behavior.
 		/// </summary>
