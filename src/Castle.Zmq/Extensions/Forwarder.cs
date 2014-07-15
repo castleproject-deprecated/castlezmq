@@ -3,7 +3,8 @@ namespace Castle.Zmq.Extensions
 	using System;
 
 	/// <summary>
-	/// Exposes a xsub and xpub, in order to 
+	/// Exposes a xsub and xpub, in order to forward pub messages to sub 
+	/// (scenarios: changing protocol, proxies, etc)
 	/// </summary>
 	public class Forwarder : Device
 	{

@@ -1,6 +1,8 @@
 ﻿namespace Castle.Zmq.Extensions
 {
 	using System;
+	using System.Runtime.ExceptionServices;
+	using System.Security;
 	using System.Threading.Tasks;
 
 
@@ -57,6 +59,7 @@
 			InternalDispose(false);
 		}
 
+		[HandleProcessCorruptedStateExceptions, SecurityCritical]
 		public virtual void Start()
 		{
 			EnsureNotDisposed();
