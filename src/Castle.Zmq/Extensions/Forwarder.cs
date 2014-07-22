@@ -5,6 +5,13 @@ namespace Castle.Zmq.Extensions
 	/// <summary>
 	/// Exposes a xsub and xpub, in order to forward pub messages to sub 
 	/// (scenarios: changing protocol, proxies, etc)
+	/// 
+	/// <para>
+	/// When the frontend is a ZMQ_XSUB socket, and the backend is a ZMQ_XPUB socket, 
+	/// the proxy shall act as a message forwarder that collects messages from a set of publishers 
+	/// and forwards these to a set of subscribers. This may be used to bridge networks 
+	/// transports, e.g. read on tcp:// and forward on pgm://.
+	/// </para>
 	/// </summary>
 	public class Forwarder : Device
 	{
