@@ -53,6 +53,9 @@
 		IEnumerable<Derived1> UsingEnumerators();
 		Derived1[] UsingArray();
 		void DoSomethingWrong();
+
+		Base ReturningNull1();
+		string ReturningNull2();
 	}
 
 	[ProtoContract]

@@ -91,6 +91,9 @@
 				var array = service.UsingArray();
 				Assert.IsNotNull(array);
 				Assert.AreEqual(2, array.Length);
+
+				service.ReturningNull1();
+				service.ReturningNull2();
 			}
 
 			watch.Stop();

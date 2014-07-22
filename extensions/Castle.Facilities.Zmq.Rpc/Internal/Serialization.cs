@@ -96,6 +96,11 @@
 				return ReflectionUtils.MakeStronglyTypedEnumerable(itemType, items);
 			}
 
+			if (response.ReturnValue == null)
+			{
+				return null;
+			}
+
 			var paramTuple = new ParamTuple(response.ReturnValue, response.ReturnValueType);
 
 			return DeserializeParamTuple(paramTuple, returnType);

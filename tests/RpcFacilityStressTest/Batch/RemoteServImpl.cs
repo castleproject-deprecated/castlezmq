@@ -93,5 +93,15 @@
 			Assert.NotNull(p1);
 			Assert.AreEqual(3, p1.Length);
 		}
+
+		public Base ReturningNull1()
+		{
+			return null;
+		}
+
+		public string ReturningNull2()
+		{
+			return null;
+		}
 	}
 }
