@@ -27,7 +27,7 @@
 		{
 			this._items = items;
 
-			if (Environment.Is64BitProcess)
+			if (!Context.IsMono && Environment.Is64BitProcess)
 				_items_x64 = new Native.Poll.zmq_pollitem_t_x64[items.Length];
 			else
 				_items_x86 = new Native.Poll.zmq_pollitem_t_x86[items.Length];
@@ -37,7 +37,7 @@
 			{
 				var pollItem = items[i];
 
-				if (Environment.Is64BitProcess)
+				if (!Context.IsMono && Environment.Is64BitProcess)
 				{
 					_items_x64[i] = pollItem.Item64;
 					_ptr2Socket[pollItem.Item64.socket] = pollItem._socket;
@@ -77,7 +77,7 @@
 			{
 				int res = 0;
 
-				if (Environment.Is64BitProcess)
+				if (!Context.IsMono && Environment.Is64BitProcess)
 				{
 					res = Native.Poll.zmq_poll_x64(_items_x64, _items_x64.Length, timeout);
 

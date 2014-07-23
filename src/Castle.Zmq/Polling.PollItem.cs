@@ -13,7 +13,7 @@
 			_socket = socket;
 			var flags = (Int16)events;
 
-			if (Environment.Is64BitProcess)
+			if (!Context.IsMono && Environment.Is64BitProcess)
 			{
 				this.Item64 = new Native.Poll.zmq_pollitem_t_x64()
 				{

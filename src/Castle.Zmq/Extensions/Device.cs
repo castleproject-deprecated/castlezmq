@@ -87,6 +87,9 @@
 				var res = Native.Device.zmq_proxy(front._socketPtr, back._socketPtr, IntPtr.Zero);
 				if (res == Native.ErrorCode)
 				{
+					// force disposal since these sockets were eterm'ed or worse
+					this.Dispose();
+
 					// this is expected
 					if (Native.LastError() == Native.ETERM) return;
 					
@@ -98,9 +101,6 @@
 					{
 						LogAdapter.LogError(this.GetType().FullName, msg);
 					}
-
-					// force disposal since these sockets were eterm'ed
-					this.Dispose();
 				}
 			});
 		}

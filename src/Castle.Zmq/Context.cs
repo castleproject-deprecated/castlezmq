@@ -211,5 +211,18 @@
 				}
 			}
 		}
+
+		private static bool? _isMono;
+		internal static bool IsMono
+		{
+			get
+			{
+				if (!_isMono.HasValue)
+				{
+					_isMono = (Type.GetType("Mono.Runtime", false) != null);
+				}
+				return _isMono.Value;
+			}
+		}
 	}
 }
