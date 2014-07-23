@@ -94,6 +94,13 @@
 					var msg = "Error on zmq_proxy: " + Native.LastErrorString();
 					System.Diagnostics.Trace.TraceError(msg);
 					System.Diagnostics.Debug.WriteLine(msg);
+					if (LogAdapter.LogEnabled)
+					{
+						LogAdapter.LogError(this.GetType().FullName, msg);
+					}
+
+					// force disposal since these sockets were eterm'ed
+					this.Dispose();
 				}
 			});
 		}

@@ -59,6 +59,11 @@ namespace Castle.Zmq.Extensions
 			}
 			catch (ZmqException e)
 			{
+				if (LogAdapter.LogEnabled)
+				{
+					LogAdapter.LogError(this.GetType().FullName, e.ToString());
+				}
+
 				if (e.ZmqErrorCode != Native.ETERM) throw;
 			}
 		}

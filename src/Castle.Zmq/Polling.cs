@@ -107,6 +107,10 @@
 				var msg = "Error polling socket(s): " + Native.LastErrorString() + " Inner: " + zex.InnerException;
 				System.Diagnostics.Trace.TraceError(msg);
 				System.Diagnostics.Debug.WriteLine(msg);
+				if (LogAdapter.LogEnabled)
+				{
+					LogAdapter.LogError(this.GetType().FullName, msg);
+				}
 			}
 		}
 

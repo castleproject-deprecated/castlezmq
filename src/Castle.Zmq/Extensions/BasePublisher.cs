@@ -1,6 +1,8 @@
 ﻿namespace Castle.Zmq.Extensions
 {
 	using System;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	public abstract class BasePublisher<T> : IDisposable where T : class
 	{
@@ -66,6 +68,8 @@
 				this._socket.Bind(this._endpoint);
 				this._started = true;
 			}
+
+			ObserveHealth();
 		}
 
 		public virtual void Stop()
@@ -83,6 +87,8 @@
 		{
 			if (_disposed) return;
 
+			_disposed = true;
+
 			try
 			{
 				this.Stop();
@@ -95,8 +101,35 @@
 			{
 				this._socket.Dispose();
 			}
+		}
 
-			_disposed = true;
+		private void ObserveHealth()
+		{
+			// For proper cleanup
+			Task.Factory.StartNew(() =>
+			{
+				var pooling = new Polling(PollingEvents.SendReady, this._socket);
+
+				try
+				{
+					while (this._started)
+					{
+						// since under normal circunstance a SendReady 
+						// is always ready, we force a wait
+						Thread.Sleep(1000);
+
+						// this should b
+						pooling.PollForever();
+					}
+				}
+				catch (Exception e)
+				{
+					// the expected error (eterm) 
+					// will cause this socket to be unusable. 
+					// thus we force the disposal
+					this.Dispose();
+				}
+			});
 		}
 
 		private void EnsureNotDisposed()

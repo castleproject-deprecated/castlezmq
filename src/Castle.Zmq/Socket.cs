@@ -13,6 +13,10 @@
 
 		internal IntPtr _socketPtr;
 
+#if DEBUG
+		private Context	_context;
+#endif
+
 		public const int NoTimeout = 0;
 		public const int InfiniteTimeout = -1;
 
@@ -27,10 +31,15 @@
 			if (context == null) throw new ArgumentNullException("context");
 			if (type < SocketType.Pub || type > SocketType.XSub) throw new ArgumentException("Invalid socket type", "socketType");
 			if (rcvTimeoutInMilliseconds < 0) throw new ArgumentException("Invalid rcvTimeout. Must be greater than zero", "rcvTimeoutInMilliseconds");
-			if (context.contextPtr == IntPtr.Zero) throw new ArgumentException("Specified context has been disposed", "context");
+			if (context._contextPtr == IntPtr.Zero) throw new ArgumentException("Specified context has been disposed", "context");
 
 			this._type = type;
-			this._socketPtr = Native.Socket.zmq_socket(context.contextPtr, (int)type);
+			this._socketPtr = Native.Socket.zmq_socket(context._contextPtr, (int)type);
+
+#if DEBUG
+			_context = context;
+			context.Track(this);
+#endif
 
 			if (rcvTimeoutInMilliseconds != NoTimeout)
 			{
@@ -232,7 +241,15 @@
 				var msg = "Error disposing socket: " + Native.LastErrorString();
 				System.Diagnostics.Trace.TraceError(msg);
 				System.Diagnostics.Debug.WriteLine(msg);
+				if (LogAdapter.LogEnabled)
+				{
+					LogAdapter.LogError(this.GetType().FullName, msg);
+				}
 			}
+
+#if DEBUG
+			_context.Untrack(this);
+#endif
 		}
 
 		private void EnsureNotDisposed()

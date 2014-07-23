@@ -54,10 +54,12 @@
 			{
 				this._socket.Connect(this._endpoint);
 
-				this._worker = new Thread(OnRecvWorker) { IsBackground = true }; 
-				this._worker.Start();
-
+				this._worker = new Thread(OnRecvWorker)
+				{
+					IsBackground = true
+				};
 				this._started = true;
+				this._worker.Start();
 			}
 		}
 
@@ -111,9 +113,14 @@
 					polling.Poll(1000);
 				}
 			}
-			catch (ZmqException)
+			catch (ZmqException e)
 			{
-				// expected
+				if (LogAdapter.LogEnabled)
+				{
+					LogAdapter.LogDebug(this.GetType().FullName, "BaseSubscriber exception. Disposing. Details: " + e.ToString());
+				}
+
+				this.Dispose();
 			}
 		}
 

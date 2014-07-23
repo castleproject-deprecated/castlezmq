@@ -7,17 +7,57 @@
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Castle.Zmq;
+	using Castle.Zmq.Extensions;
 
 	class Program
 	{
 		static void Main(string[] args)
 		{
-			using (var ctx = new Context())
-			{
-//				ReqRepTest(ctx);
+			var ctx = new Context();
 
-//				PubSubWithPolling(ctx);
-			}
+			Console.CancelKeyPress += (sender, eventArgs) =>
+			{
+				Console.WriteLine("Stopping...");
+
+				ctx.Dispose();
+			};
+
+//			ReqRepTest(ctx);
+//
+//			PubSubWithPolling(ctx);
+
+			PubSubWithExtensions(ctx);
+		}
+
+		private static void PubSubWithExtensions(Context ctx)
+		{
+			var pub = new MyPub(ctx, "tcp://0.0.0.0:8809");
+
+			var sub1 = new MySub(ctx, "tcp://127.0.0.1:8809");
+			var sub2 = new MySub(ctx, "tcp://127.0.0.1:8809");
+			var sub3 = new MySub(ctx, "tcp://127.0.0.1:8809");
+
+			sub1.Start();
+			sub2.Start();
+			sub3.Start();
+
+			pub.Start();
+
+			Task.Factory.StartNew(() =>
+			{
+				while (true)
+				{
+					pub.Publish("t1", new MyMessage() { Msg = "Upon successful completion, the zmq_poll() function shall return the number of zmq_pollitem_t structures with events signaled in revents or 0 if no events have been signaled. Upon failure, zmq_poll() shall return -1 and set errno to one of the values defined below." });
+
+					pub.Publish("t2", new MyMessage() { Msg = "Upon successful completion, the zmq_poll() function shall return the number of zmq_pollitem_t structures with events signaled in revents or 0 if no events have been signaled. Upon failure, zmq_poll() shall return -1 and set errno to one of the values defined below." });
+
+					pub.Publish("t3", new MyMessage() { Msg = "Upon successful completion, the zmq_poll() function shall return the number of zmq_pollitem_t structures with events signaled in revents or 0 if no events have been signaled. Upon failure, zmq_poll() shall return -1 and set errno to one of the values defined below." });
+
+					Thread.Sleep(1);
+				}
+			});
+
+			Thread.CurrentThread.Join();
 		}
 
 		private static void PubSubWithPolling(Context ctx)
@@ -143,5 +183,48 @@
 				}
 			}
 		}
+	}
+
+	internal class MyPub : BasePublisher<MyMessage>
+	{
+		public MyPub(IZmqContext context, string endpoint) : base(context, endpoint, Serializer)
+		{
+		}
+
+		private static byte[] Serializer(MyMessage arg)
+		{
+			return Encoding.UTF8.GetBytes(arg.Msg);
+		}
+	}
+
+	internal class MySub : BaseSubscriber<MyMessage>
+	{
+		public MySub(IZmqContext context, string endpoint) : base(context, endpoint, Deserializer)
+		{
+		}
+
+		public override void Start()
+		{
+			base.Start();
+
+			SubscribeToTopic("");
+		}
+
+		private static MyMessage Deserializer(byte[] arg)
+		{
+			var m = Encoding.UTF8.GetString(arg);
+			return new MyMessage() { Msg = m };
+		}
+
+		protected override void OnReceived(string topic, MyMessage message)
+		{
+			
+		}
+	}
+
+	internal class MyMessage
+	{
+		public string Msg { get; set; }
+		
 	}
 }
