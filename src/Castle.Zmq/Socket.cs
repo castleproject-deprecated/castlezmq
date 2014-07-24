@@ -121,7 +121,7 @@
 				if (res == Native.ErrorCode)
 				{
 					var error = Native.LastError();
-					if (error == Native.Socket.EAGAIN)
+					if (error == Native.Socket.EAGAIN || error == Native.EINTR)
 					{
 						// not the end of the world
 						return null;

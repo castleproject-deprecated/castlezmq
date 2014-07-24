@@ -100,7 +100,15 @@
 					}
 				}
 
-				if (res == Native.ErrorCode) Native.ThrowZmqError();
+				if (res == Native.ErrorCode)
+				{
+					var error = Native.LastError();
+					
+					if (error != Native.EINTR) // Unix system interruption 
+					{
+						Native.ThrowZmqError();
+					}
+				}
 			}
 			catch (SEHException zex) // rare, but may happen if the endpoint disconnects uncleanly
 			{

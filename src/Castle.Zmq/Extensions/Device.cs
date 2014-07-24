@@ -83,10 +83,17 @@
 				StartFrontEnd();
 				StartBackEnd();
 
+				restart:
 				// this will block forever, hence it's running in a separate thread
 				var res = Native.Device.zmq_proxy(front._socketPtr, back._socketPtr, IntPtr.Zero);
+
 				if (res == Native.ErrorCode)
 				{
+					if (Native.LastError() == Native.EINTR) // unix interruption
+					{
+						goto restart;
+					}
+
 					// force disposal since these sockets were eterm'ed or worse
 					this.Dispose();
 
