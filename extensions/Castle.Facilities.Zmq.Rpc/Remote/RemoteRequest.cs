@@ -1,8 +1,6 @@
 ﻿namespace Castle.Facilities.Zmq.Rpc.Remote
 {
-	using System;
 	using Castle.Zmq;
-	using Castle.Zmq.Counters;
 	using Castle.Zmq.Extensions;
 	using Castle.Zmq.Rpc.Model;
 
@@ -17,9 +15,9 @@
 							 RequestMessage requestMessage, 
 							 SerializationStrategy serializationStrategy) : base(context, endpoint)
 		{
-			_endpoint = endpoint;
-			_requestMessage = requestMessage;
-			_serializationStrategy = serializationStrategy;
+			this._endpoint = endpoint;
+			this._requestMessage = requestMessage;
+			this._serializationStrategy = serializationStrategy;
 
 			this.Timeout = 30 * 1000;
 		}
@@ -31,11 +29,11 @@
 			// PerfCounters.IncrementSent ()
 		}
 
-		protected override ResponseMessage GetReply(IZmqSocket socket)
+		protected override ResponseMessage GetReply(byte[] buffer, IZmqSocket socket, bool hasTimeoutWaitingRecv)
 		{
-			var buffer = socket.Recv();
+			// var buffer = socket.Recv();
 
-			if (buffer == null)
+			if (hasTimeoutWaitingRecv)
 			{
 				var message = "Remote call took too long to respond. Is the server up? Endpoint: " + 
 						_endpoint + " - Current timeout " + this.Timeout;

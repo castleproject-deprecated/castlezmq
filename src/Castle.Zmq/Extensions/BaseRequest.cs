@@ -24,20 +24,31 @@
 		{
 			using (var socket = _context.Req())
 			{
-				if (this.Timeout != Socket.InfiniteTimeout)
-				{
-					socket.SetOption(SocketOpt.RCVTIMEO, this.Timeout);
-				}
+//				if (this.Timeout != Socket.InfiniteTimeout)
+//				{
+//					socket.SetOption(SocketOpt.RCVTIMEO, this.Timeout);
+//				}
 
 				socket.Connect(_endpoint);
 
 				SendRequest(socket);
 
-				return GetReply(socket);
+				var polling = new Polling(PollingEvents.RecvReady, socket);
+				if (polling.Poll(this.Timeout))
+				{
+					var data = socket.Recv();
+					return GetReply(data, socket, false);
+				}
+				else
+				{
+					// timeout
+					return GetReply(null, socket, true);
+				}
+				
 			}
 		}
 
-		protected abstract T GetReply(IZmqSocket socket);
+		protected abstract T GetReply(byte[] data, IZmqSocket socket, bool hasTimeoutWaitingRecv);
 
 		protected abstract void SendRequest(IZmqSocket socket);
 	}

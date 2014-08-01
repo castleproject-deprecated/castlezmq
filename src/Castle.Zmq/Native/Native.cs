@@ -59,7 +59,7 @@
 			var msg = LastErrorString(error);
 			if (context == null)
 				throw new ZmqException(msg, error);
-			throw new ZmqException(msg + " in " + context, error);
+			throw new ZmqException(msg + " in " + context + " | Error code: " + error, error);
 		}
 	}
 }

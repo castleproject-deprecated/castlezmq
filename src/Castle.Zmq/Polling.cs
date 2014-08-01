@@ -71,17 +71,17 @@
 		public SocketEventDelegate SendReady;
 
 		[HandleProcessCorruptedStateExceptions, SecurityCritical]
-		public void Poll(int timeout)
+		public bool Poll(int timeout)
 		{
+			int res = 0;
+
 			try
 			{
-				int res = 0;
-
 				if (!Context.IsMono && Environment.Is64BitProcess)
 				{
 					res = Native.Poll.zmq_poll_x64(_items_x64, _items_x64.Length, timeout);
 
-					if (res == 0) return; // nothing happened
+					if (res == 0) return false; // nothing happened
 
 					if (res > 0)
 					{
@@ -92,7 +92,7 @@
 				{
 					res = Native.Poll.zmq_poll_x86(_items_x86, _items_x86.Length, timeout);
 
-					if (res == 0) return; // nothing happened
+					if (res == 0) return false; // nothing happened
 
 					if (res > 0)
 					{
@@ -120,22 +120,23 @@
 					LogAdapter.LogError(this.GetType().FullName, msg);
 				}
 			}
+			return (res > 0);
 		}
 
 		/// <summary>
 		/// Returns immediately
 		/// </summary>
-		public void PollNow()
+		public bool PollNow()
 		{
-			Poll(0);
+			return Poll(0);
 		}
 
 		/// <summary>
-		/// Wont return
+		/// Wont return until gets a signal
 		/// </summary>
-		public void PollForever()
+		public bool PollForever()
 		{
-			Poll(-1);
+			return Poll(-1);
 		}
 
 		private void InternalFireEvents64(Native.Poll.zmq_pollitem_t_x64[] items)

@@ -95,8 +95,6 @@
 				response = Builder.BuildResponse(ex);
 			}
 			return response;
-		}
-
-		
+		}		
 	}
 }

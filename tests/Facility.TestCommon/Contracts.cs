@@ -1,4 +1,4 @@
-﻿namespace RpcFacilityStressTest
+﻿namespace Facility.TestCommon
 {
 	using System;
 	using System.Collections.Generic;

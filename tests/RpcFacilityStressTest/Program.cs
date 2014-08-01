@@ -6,6 +6,7 @@
 	using Castle.MicroKernel.Registration;
 	using Castle.Windsor;
 	using Castle.Windsor.Configuration.Interpreters;
+	using Facility.TestCommon;
 	using NUnit.Framework;
 
 
