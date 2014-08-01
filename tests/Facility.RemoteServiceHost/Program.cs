@@ -15,7 +15,7 @@
 		{
 			Console.WriteLine("Starting");
 
-			Castle.Zmq.Context.EnsureZmqLibrary();
+//			Castle.Zmq.Context.EnsureZmqLibrary();
 			Castle.Zmq.LogAdapter.LogEnabled = true;
 			Castle.Zmq.LogAdapter.LogDebugFn = (scope, msg) => Console.WriteLine("Debug {0}: {1}", scope, msg);
 			Castle.Zmq.LogAdapter.LogErrorFn = (scope, msg) => Console.WriteLine("Error {0}: {1}", scope, msg);

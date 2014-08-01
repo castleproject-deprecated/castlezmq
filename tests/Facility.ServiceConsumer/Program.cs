@@ -36,7 +36,7 @@
 
 			Console.WriteLine("Performing firehose requests");
 
-			for (var i = 0; i < 50; i++)
+			for (var i = 0; i < 40; i++)
 			{
 				var t = new Thread(TestRemoteService) {IsBackground = true};
 				t.Start();
@@ -92,7 +92,7 @@
 			watch.Start();
 
 			// 1000
-			for (var i = 0; i < 1000; i++)
+			for (var i = 0; i < 100; i++)
 			{
 				// Console.WriteLine("new batch ");
 

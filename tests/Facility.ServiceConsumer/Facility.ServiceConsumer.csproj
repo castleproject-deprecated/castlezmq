@@ -76,7 +76,6 @@
   <ItemGroup>
     <Content Include="..\..\lib\zeromq\x64\libzmq.dll">
       <Link>libzmq.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

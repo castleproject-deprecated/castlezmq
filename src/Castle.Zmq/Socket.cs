@@ -36,6 +36,11 @@
 			this._type = type;
 			this._socketPtr = Native.Socket.zmq_socket(context._contextPtr, (int)type);
 
+			if (this._socketPtr == IntPtr.Zero)
+			{
+				throw new InvalidOperationException("The attempt to create a zmqsocket failed");
+			}
+
 #if DEBUG
 			_context = context;
 			context.Track(this);
@@ -94,7 +99,14 @@
 			EnsureNotDisposed();
 
 			var res = Native.Socket.zmq_connect(this._socketPtr, endpoint);
-			if (res == Native.ErrorCode) Native.ThrowZmqError("Connecting " + endpoint);
+			if (res == Native.ErrorCode)
+			{
+				if (Native.LastError() == 128)
+				{
+					System.Diagnostics.Debugger.Break();
+				}
+				Native.ThrowZmqError("Connecting " + endpoint);
+			}
 		}
 
 		public void Disconnect(string endpoint)
