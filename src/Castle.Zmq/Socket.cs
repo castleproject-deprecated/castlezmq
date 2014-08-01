@@ -38,7 +38,7 @@
 
 			if (this._socketPtr == IntPtr.Zero)
 			{
-				throw new InvalidOperationException("The attempt to create a zmqsocket failed");
+				Native.ThrowZmqError("Socket creation ");
 			}
 
 #if DEBUG
