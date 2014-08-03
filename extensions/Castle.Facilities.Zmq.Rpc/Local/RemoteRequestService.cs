@@ -3,6 +3,7 @@ namespace Castle.Facilities.Zmq.Rpc
 	using System;
 	using Castle.Facilities.Zmq.Rpc.Remote;
 	using Castle.Zmq;
+	using Castle.Zmq.Extensions;
 	using Castle.Zmq.Rpc.Model;
 
 	public class RemoteRequestService
@@ -10,14 +11,17 @@ namespace Castle.Facilities.Zmq.Rpc
 		private readonly IZmqContext _context;
 		private readonly RemoteEndpointRegistry _endpointRegistry;
 		private readonly SerializationStrategy _serializationStrategy;
+		private readonly RequestPoll _requestPoll;
 
 		public RemoteRequestService(IZmqContext context, 
 									RemoteEndpointRegistry endpointRegistry, 
-									SerializationStrategy serializationStrategy)
+									SerializationStrategy serializationStrategy, 
+									RequestPoll requestPoll)
 		{
 			this._context = context;
 			this._endpointRegistry = endpointRegistry;
 			this._serializationStrategy = serializationStrategy;
+			this._requestPoll = requestPoll;
 		}
 
 		public object Invoke(string host, string service, string methodName, 
@@ -30,7 +34,10 @@ namespace Castle.Facilities.Zmq.Rpc
 
 			var requestMessage = new RequestMessage(service, methodName, serializedArs, serializedPInfo);
 
-			var request = new RemoteRequest(this._context, endpoint, requestMessage, this._serializationStrategy);
+			var request = new RemoteRequest(this._context, endpoint, requestMessage, this._serializationStrategy)
+			{
+				ReqPoll = this._requestPoll
+			};
 			
 			ResponseMessage response = request.Get();
 

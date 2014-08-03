@@ -3,6 +3,7 @@ namespace Castle.Zmq.Extensions
 	using System;
 	using System.Threading;
 
+
 	public class WorkerPool : SharedQueue
 	{
 		private readonly IZmqContext _ctx;

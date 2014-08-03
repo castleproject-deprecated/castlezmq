@@ -115,7 +115,7 @@
 			EnsureNotDisposed();
 
 			var res = Native.Socket.zmq_disconnect(this._socketPtr, endpoint);
-			if (res == Native.ErrorCode) Native.ThrowZmqError("Disonnecting " + endpoint);
+			if (res == Native.ErrorCode) Native.ThrowZmqError("Disconnecting " + endpoint);
 		}
 
 		#endregion
@@ -255,7 +255,7 @@
 				System.Diagnostics.Debug.WriteLine(msg);
 				if (LogAdapter.LogEnabled)
 				{
-					LogAdapter.LogError(this.GetType().FullName, msg);
+					LogAdapter.LogError("Socket", msg);
 				}
 			}
 

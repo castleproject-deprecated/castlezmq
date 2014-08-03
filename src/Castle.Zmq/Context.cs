@@ -192,7 +192,7 @@
 				System.Diagnostics.Debug.WriteLine("Socket tracking: " + message);
 				if (LogAdapter.LogEnabled)
 				{
-					LogAdapter.LogError(this.GetType().FullName, "Socket tracking: " + message);
+					LogAdapter.LogError("Context", "Socket tracking: " + message);
 				}
 #endif 
 
@@ -206,7 +206,7 @@
 
 					if (LogAdapter.LogEnabled)
 					{
-						LogAdapter.LogError(this.GetType().FullName, msg);
+						LogAdapter.LogError("Context", msg);
 					}
 				}
 			}

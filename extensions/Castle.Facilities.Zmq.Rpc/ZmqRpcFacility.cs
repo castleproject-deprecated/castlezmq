@@ -8,6 +8,7 @@
 	using Castle.Facilities.Zmq.Rpc.Remote;
 	using Castle.MicroKernel.Facilities;
 	using Castle.MicroKernel.Registration;
+	using Castle.Zmq.Extensions;
 
 	public class ZmqRpcFacility : AbstractFacility
     {
@@ -26,6 +27,7 @@
 					Component.For<SerializationStrategy>().ImplementedBy<ProtoBufSerializationStrategy>(),
 					Component.For<RemoteEndpointRegistry>(),
 					Component.For<RemoteRequestService>(),
+					Component.For<RequestPoll>(),
 					Component.For<ZmqRpcCleaner>(),
 					Component.For<LocalInvocationDispatcher>(),
 					Component.For<RemoteRequestInterceptor>().LifeStyle.Transient

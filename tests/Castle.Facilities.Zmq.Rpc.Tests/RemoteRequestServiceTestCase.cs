@@ -3,6 +3,7 @@
 	using System;
 	using Castle.Facilities.Zmq.Rpc.Internal;
 	using Castle.Facilities.Zmq.Rpc.Remote;
+	using Castle.Zmq.Extensions;
 	using Castle.Zmq.Rpc.Model;
 	using Castle.Zmq.Stubs;
 	using FluentAssertions;
@@ -40,7 +41,7 @@
 			});
 
 
-			var req = new RemoteRequestService(_context, _registry, _serialization);
+			var req = new RemoteRequestService(_context, _registry, _serialization, new RequestPoll(_context));
 
 			var result = req.Invoke(TestHostName, TestService, "method", 
 									new object[0], Type.EmptyTypes, typeof (void));
@@ -62,7 +63,7 @@
 			});
 
 
-			var req = new RemoteRequestService(_context, _registry, _serialization);
+			var req = new RemoteRequestService(_context, _registry, _serialization, new RequestPoll(_context));
 
 			var result = req.Invoke(TestHostName, TestService, "method",
 									new object[0], Type.EmptyTypes, typeof(string));
@@ -82,7 +83,7 @@
 				return socket;
 			});
 
-			var req = new RemoteRequestService(_context, _registry, _serialization);
+			var req = new RemoteRequestService(_context, _registry, _serialization, new RequestPoll(_context));
 
 			Assert.Throws<Exception>(() =>
 			{
