@@ -70,7 +70,7 @@
 		private void SetUpServer()
 		{
 			var listeningEndpoint = base.FacilityConfig.Attributes["listen"];
-			var workers = base.FacilityConfig.Attributes["wokers"] ?? "3";
+			var workers = base.FacilityConfig.Attributes["wokers"] ?? "30";
 
 			if (listeningEndpoint.IndexOf("://", StringComparison.Ordinal) == -1)
 			{

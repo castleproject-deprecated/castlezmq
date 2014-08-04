@@ -36,8 +36,7 @@
 		{
 			this._context = context;
 			this._endpoint = endpoint;
-//			this._workers = workers;
-			this._workers = 30;
+			this._workers = workers;
 			this._dispatcher = dispatcher;
 			this._serializationStrategy = serializationStrategy;
 
