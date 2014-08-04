@@ -2,13 +2,13 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Castle.Zmq</id>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
     <authors>Castle Project Contributors</authors>
     <owners>Castle Project Contributors</owners>
     <licenseUrl>https://www.gnu.org/licenses/lgpl.html</licenseUrl>
     <projectUrl>https://github.com/castleproject/castlezmq</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Castle ZeroMQ Bindings</description>
+    <description>Castle ZeroMQ Bindings - More info at https://github.com/castleproject/castlezmq</description>
     <summary>Castle ZeroMQ Bindings</summary>
     <copyright>Copyright 2004-2014 Castle Project - http://www.castleproject.org/</copyright>
     <tags>castle zeromq zmq 0mq</tags>
