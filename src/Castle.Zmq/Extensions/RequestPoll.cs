@@ -62,6 +62,12 @@ namespace Castle.Zmq.Extensions
 			if (socket == null) throw new ArgumentNullException("socket");
 			if (string.IsNullOrEmpty(endpoint)) throw new ArgumentNullException("endpoint");
 
+			if (_disposed)
+			{
+				socket.Dispose();
+				return;
+			}
+
 			// untrack
 			lock (this._socketsInUse)
 				this._socketsInUse.Remove(socket);
