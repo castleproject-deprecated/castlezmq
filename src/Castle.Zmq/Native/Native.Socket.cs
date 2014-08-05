@@ -18,9 +18,6 @@
 			/// <summary> More message frames will follow the current frame </summary>
 			public const int SNDMORE = 2;
 
-			// send operation must be tried again (may happen when sending with DONTWAIT)
-			public const int EAGAIN = 11;
-
 			#endregion
 
 			[DllImport("libzmq", CallingConvention = CallingConvention.Cdecl)]

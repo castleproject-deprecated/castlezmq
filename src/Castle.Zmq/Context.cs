@@ -143,7 +143,7 @@
 			IntPtr libPtr = Native.LoadLibrary(tempFile);
 			if (libPtr == IntPtr.Zero)
 			{
-				throw new InvalidOperationException("Unable to load libzmq.");
+				throw new InvalidOperationException("Unable to load libzmq " + (Environment.Is64BitProcess ? "x64" : "win32") + " from " + tempFile);
 			}
 		}
 

@@ -128,16 +128,20 @@
 			{
 				var flags = noWait ? Native.Socket.DONTWAIT : 0;
 
+			again:
 				var res = Native.MsgFrame.zmq_msg_recv(frame._msgPtr, this._socketPtr, flags);
 
 				if (res == Native.ErrorCode)
 				{
 					var error = Native.LastError();
-					if (error == Native.Socket.EAGAIN || error == Native.EINTR)
+
+					if (error == Native.EAGAIN || error == Native.EINTR) goto again;
+
+					if (LogAdapter.LogEnabled)
 					{
-						// not the end of the world
-						return null;
+						LogAdapter.LogError("Socket", "Recv interrupted with " + error + " - " + Native.LastErrorString(error));
 					}
+
 					Native.ThrowZmqError(error, "Recv");
 				}
 				else
@@ -159,11 +163,23 @@
 
 			var len = buffer.Length;
 
+			again:
 			var res = Native.Socket.zmq_send(this._socketPtr, buffer, len, flags);
 
 			// for now we're treating EAGAIN as error. 
 			// not sure that's OK
-			if (res == Native.ErrorCode) Native.ThrowZmqError("Send");
+			if (res == Native.ErrorCode)
+			{
+				var error = Native.LastError();
+				if (error == Native.EINTR || error == Native.EAGAIN) goto again;
+
+				if (LogAdapter.LogEnabled)
+				{
+					LogAdapter.LogError("Socket", "Send interrupted with " + error + " - " + Native.LastErrorString(error));
+				}
+
+				Native.ThrowZmqError("Send");
+			}
 		}
 
 		/// <summary>

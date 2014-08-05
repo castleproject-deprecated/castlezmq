@@ -57,20 +57,21 @@ namespace Castle.Zmq.Extensions
 			return socket;
 		}
 
-		public void Return(IZmqSocket socket, string endpoint)
+		public void Return(IZmqSocket socket, string endpoint, bool inError)
 		{
 			if (socket == null) throw new ArgumentNullException("socket");
 			if (string.IsNullOrEmpty(endpoint)) throw new ArgumentNullException("endpoint");
 
-			if (_disposed)
+			if (_disposed || inError)
 			{
 				socket.Dispose();
+
+				if (inError) this.Untrack(socket);
+
 				return;
 			}
 
-			// untrack
-			lock (this._socketsInUse)
-				this._socketsInUse.Remove(socket);
+			this.Untrack(socket);
 
 			var socketQueue = _endpoint2Sockets.GetOrAdd(endpoint, _ => new ConcurrentQueue<IZmqSocket>());
 
@@ -84,6 +85,14 @@ namespace Castle.Zmq.Extensions
 		public void Dispose()
 		{
 			InternalDispose(true);
+		}
+
+		private void Untrack(IZmqSocket socket)
+		{
+			lock (this._socketsInUse)
+			{
+				this._socketsInUse.Remove(socket);
+			}
 		}
 
 		private void InternalDispose(bool isDisposing)

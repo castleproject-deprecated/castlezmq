@@ -27,17 +27,19 @@
 			if (ReqPoll != null)
 			{
 				var socket = ReqPoll.Get(_endpoint);
+				var inError = false;
 
 				try
 				{
-					return SendReqAndWaitReply(socket);
+					var tuple = SendReqAndWaitReply(socket);
+					inError = tuple.Item2;
+					return tuple.Item1;
 				}
 				finally
 				{
-					ReqPoll.Return(socket, _endpoint);
+					ReqPoll.Return(socket, _endpoint, inError);
 				}
 			}
-
 
 			using (var socket = _context.Req())
 			{
@@ -48,11 +50,12 @@
 
 				socket.Connect(_endpoint);
 
-				return SendReqAndWaitReply(socket);
+				var tuple = SendReqAndWaitReply(socket);
+				return tuple.Item1;
 			}
 		}
 
-		private T SendReqAndWaitReply(IZmqSocket socket)
+		private Tuple<T, bool> SendReqAndWaitReply(IZmqSocket socket)
 		{
 			SendRequest(socket);
 
@@ -60,12 +63,14 @@
 			if (polling.Poll(this.Timeout))
 			{
 				var data = socket.Recv();
-				return GetReply(data, socket, false);
+				var ret = GetReply(data, socket, false);
+				return Tuple.Create(ret, false);
 			}
 			else
 			{
 				// timeout
-				return GetReply(null, socket, true);
+				var ret = GetReply(null, socket, true);
+				return Tuple.Create(ret, true);
 			}
 		}
 
