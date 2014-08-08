@@ -51,7 +51,9 @@
     <Compile Include="Extensions\WorkerPool.cs" />
     <Compile Include="Internal\MsgFrame.cs" />
     <Compile Include="LogAdapter.cs" />
+    <Compile Include="Monitor.cs" />
     <Compile Include="Native\Native.Device.cs" />
+    <Compile Include="Native\Native.Monitor.cs" />
     <Compile Include="Native\Native.MsgFrame.cs" />
     <Compile Include="Native\MarshalExt.cs" />
     <Compile Include="Native\Native.Poll.cs" />

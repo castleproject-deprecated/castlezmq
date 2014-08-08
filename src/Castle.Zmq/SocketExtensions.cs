@@ -9,6 +9,12 @@
 	/// </summary>
 	public static class SocketExtensions
 	{
+		internal static IntPtr Handle(this IZmqSocket source)
+		{
+			var socket = (Socket) source;
+			return socket.SocketPtr;
+		}
+
 		public static void Connect(this IZmqSocket source, Transport transport, string address, uint port, int timeout = Socket.InfiniteTimeout)
 		{
 			var endpoint = BuildEndpoint(transport, address, port);

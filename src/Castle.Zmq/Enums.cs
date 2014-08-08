@@ -36,6 +36,7 @@
 
 	public enum SocketType
 	{
+		Pair = 0,
 		Pub = 1,
 		Sub = 2,
 		Req = 3,

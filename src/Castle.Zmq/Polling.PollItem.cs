@@ -17,7 +17,7 @@
 			{
 				this.Item64 = new Native.Poll.zmq_pollitem_t_x64()
 				{
-					socket = socket._socketPtr,
+					socket = socket.Handle(),
 					events = flags
 				};
 			}
@@ -25,7 +25,7 @@
 			{
 				this.Item32 = new Native.Poll.zmq_pollitem_t_x86()
 				{
-					socket = socket._socketPtr,
+					socket = socket.Handle(),
 					events = flags
 				};
 			}

@@ -83,9 +83,9 @@
 				StartFrontEnd();
 				StartBackEnd();
 
-				restart:
+			restart:
 				// this will block forever, hence it's running in a separate thread
-				var res = Native.Device.zmq_proxy(front._socketPtr, back._socketPtr, IntPtr.Zero);
+				var res = Native.Device.zmq_proxy(front.Handle(), back.Handle(), IntPtr.Zero);
 
 				if (res == Native.ErrorCode)
 				{

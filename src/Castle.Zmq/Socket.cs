@@ -11,7 +11,7 @@
 		private readonly SocketType _type;
 		private volatile bool _disposed;
 
-		internal IntPtr _socketPtr;
+		internal IntPtr SocketPtr;
 
 #if DEBUG
 		private Context	_context;
@@ -29,14 +29,14 @@
 		public Socket(Context context, SocketType type, int rcvTimeoutInMilliseconds = NoTimeout)
 		{
 			if (context == null) throw new ArgumentNullException("context");
-			if (type < SocketType.Pub || type > SocketType.XSub) throw new ArgumentException("Invalid socket type", "socketType");
+			if (type < SocketType.Pair || type > SocketType.XSub) throw new ArgumentException("Invalid socket type", "socketType");
 			if (rcvTimeoutInMilliseconds < 0) throw new ArgumentException("Invalid rcvTimeout. Must be greater than zero", "rcvTimeoutInMilliseconds");
 			if (context._contextPtr == IntPtr.Zero) throw new ArgumentException("Specified context has been disposed", "context");
 
 			this._type = type;
-			this._socketPtr = Native.Socket.zmq_socket(context._contextPtr, (int)type);
+			this.SocketPtr = Native.Socket.zmq_socket(context._contextPtr, (int)type);
 
-			if (this._socketPtr == IntPtr.Zero)
+			if (this.SocketPtr == IntPtr.Zero)
 			{
 				Native.ThrowZmqError("Socket creation ");
 			}
@@ -80,7 +80,7 @@
 			if (string.IsNullOrEmpty(endpoint)) throw new ArgumentNullException("endpoint");
 			EnsureNotDisposed();
 
-			var res = Native.Socket.zmq_bind(this._socketPtr, endpoint);
+			var res = Native.Socket.zmq_bind(this.SocketPtr, endpoint);
 			if (res == Native.ErrorCode) Native.ThrowZmqError("Binding " + endpoint);
 		}
 
@@ -89,7 +89,7 @@
 			if (string.IsNullOrEmpty(endpoint)) throw new ArgumentNullException("endpoint");
 			EnsureNotDisposed();
 
-			var res = Native.Socket.zmq_unbind(this._socketPtr, endpoint);
+			var res = Native.Socket.zmq_unbind(this.SocketPtr, endpoint);
 			if (res == Native.ErrorCode) Native.ThrowZmqError("Unbinding " + endpoint);
 		}
 
@@ -98,7 +98,7 @@
 			if (string.IsNullOrEmpty(endpoint)) throw new ArgumentNullException("endpoint");
 			EnsureNotDisposed();
 
-			var res = Native.Socket.zmq_connect(this._socketPtr, endpoint);
+			var res = Native.Socket.zmq_connect(this.SocketPtr, endpoint);
 			if (res == Native.ErrorCode)
 			{
 				if (Native.LastError() == 128)
@@ -114,7 +114,7 @@
 			if (string.IsNullOrEmpty(endpoint)) throw new ArgumentNullException("endpoint");
 			EnsureNotDisposed();
 
-			var res = Native.Socket.zmq_disconnect(this._socketPtr, endpoint);
+			var res = Native.Socket.zmq_disconnect(this.SocketPtr, endpoint);
 			if (res == Native.ErrorCode) Native.ThrowZmqError("Disconnecting " + endpoint);
 		}
 
@@ -129,7 +129,7 @@
 				var flags = noWait ? Native.Socket.DONTWAIT : 0;
 
 			again:
-				var res = Native.MsgFrame.zmq_msg_recv(frame._msgPtr, this._socketPtr, flags);
+				var res = Native.MsgFrame.zmq_msg_recv(frame._msgPtr, this.SocketPtr, flags);
 
 				if (res == Native.ErrorCode)
 				{
@@ -164,7 +164,7 @@
 			var len = buffer.Length;
 
 			again:
-			var res = Native.Socket.zmq_send(this._socketPtr, buffer, len, flags);
+			var res = Native.Socket.zmq_send(this.SocketPtr, buffer, len, flags);
 
 			// for now we're treating EAGAIN as error. 
 			// not sure that's OK
@@ -262,7 +262,7 @@
 
 			TryCancelLinger();
 
-			var res = Native.Socket.zmq_close(this._socketPtr);
+			var res = Native.Socket.zmq_close(this.SocketPtr);
 			if (res == Native.ErrorCode)
 			{
 				// we cannot throw in dispose. 
@@ -345,7 +345,7 @@
 			{
 				marshaller(bufPtr, value);
 
-				var res = Native.Socket.zmq_setsockopt(this._socketPtr, option, bufPtr, bufferSize);
+				var res = Native.Socket.zmq_setsockopt(this.SocketPtr, option, bufPtr, bufferSize);
 				if (!ignoreError && res == Native.ErrorCode) 
 					Native.ThrowZmqError("setting option " + option + " with value " + value);
 
@@ -367,7 +367,7 @@
 
 				MarshalExt.AllocAndRun(bufferPtr =>
 				{
-					var res = Native.Socket.zmq_getsockopt(this._socketPtr, option, bufferPtr, sizePtr);
+					var res = Native.Socket.zmq_getsockopt(this.SocketPtr, option, bufferPtr, sizePtr);
 					if (res == Native.ErrorCode) Native.ThrowZmqError();
 
 					retValue = unmarshaller(bufferPtr, bufferLen);

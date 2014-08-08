@@ -6,6 +6,10 @@
 	/// </summary>
 	public static class ContextExtensions
 	{
+		public static IZmqSocket Pair(this IZmqContext source)
+		{
+			return source.CreateSocket(SocketType.Pair);
+		}
 		public static IZmqSocket Pub(this IZmqContext source)
 		{
 			return source.CreateSocket(SocketType.Pub);
