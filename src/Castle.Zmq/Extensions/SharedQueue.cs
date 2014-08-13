@@ -8,14 +8,14 @@
 	/// </summary>
 	public class SharedQueue : Device
 	{
-		public SharedQueue(IZmqSocket frontend, IZmqSocket backend) : base(frontend, backend)
+		public SharedQueue(IZmqSocket frontend, IZmqSocket backend, bool enableCapture = false) : base(frontend, backend, enableCapture)
 		{
 			if (frontend.SocketType != SocketType.Router) throw new ArgumentException("Frontend must be a Router");
 			if (backend.SocketType != SocketType.Dealer) throw new ArgumentException("Backend must be a Dealer");
 		}
 
-		public SharedQueue(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint)
-			: base(ctx, frontEndEndpoint, backendEndpoint, SocketType.Router, SocketType.Dealer)
+		public SharedQueue(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint, bool enableCapture = false)
+			: base(ctx, frontEndEndpoint, backendEndpoint, SocketType.Router, SocketType.Dealer, enableCapture)
 		{
 		}
 	}

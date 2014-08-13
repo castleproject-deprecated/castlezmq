@@ -3,6 +3,8 @@
 	using System;
 	using System.Runtime.ExceptionServices;
 	using System.Security;
+	using System.Text;
+	using System.Threading;
 	using System.Threading.Tasks;
 
 
@@ -16,11 +18,14 @@
 		private readonly IZmqContext _ctx;
 		private readonly SocketType _frontendType;
 		private readonly SocketType _backendType;
+		private readonly bool _enableCapture;
 		private volatile bool _disposed;
 		private readonly bool _ownSockets;
 		private readonly bool _needsBinding;
 
-		protected Device(IZmqSocket frontend, IZmqSocket backend)
+		public event Action<byte[]> Captured;
+
+		protected Device(IZmqSocket frontend, IZmqSocket backend, bool enableCapture = false)
 		{
 			if (frontend == null) throw new ArgumentNullException("frontend");
 			if (backend == null) throw new ArgumentNullException("backend");
@@ -29,10 +34,11 @@
 			this.Backend = backend;
 
 			this._needsBinding = false;
+			this._enableCapture = enableCapture;
 		}
 
-		protected Device(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint, 
-						 SocketType frontendType, SocketType backendType)
+		protected Device(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint,
+						 SocketType frontendType, SocketType backendType, bool enableCapture = false)
 		{
 			if (ctx == null) throw new ArgumentNullException("ctx");
 			if (string.IsNullOrEmpty(frontEndEndpoint)) throw new ArgumentNullException("frontEndEndpoint");
@@ -41,6 +47,7 @@
 			this._ctx = ctx;
 			this._frontendType = frontendType;
 			this._backendType = backendType;
+			this._enableCapture = enableCapture;
 			this._ownSockets = true;
 			this._needsBinding = true;
 
@@ -83,10 +90,58 @@
 				StartFrontEnd();
 				StartBackEnd();
 
+				IZmqSocket captureSink, capReceiver;
+				captureSink = capReceiver = null;
+
+				if (this._enableCapture)
+				{
+					Random Rnd = new Random((int)DateTime.Now.Ticks);
+					var captureendpoint = "inproc://capture" + Rnd.Next(0, Int32.MaxValue);
+					captureSink = _ctx.Pair();
+					captureSink.Bind(captureendpoint);
+
+					capReceiver = _ctx.Pair();
+					capReceiver.Connect(captureendpoint);
+
+
+					var captureThread = new Thread(() =>
+					{
+						try
+						{
+							while (true)
+							{
+								var data = capReceiver.Recv();
+								if (data == null) continue;
+
+								var ev = this.Captured;
+								if (ev != null)
+								{
+									ev(data);
+								}
+
+								if (LogAdapter.LogEnabled)
+								{
+									LogAdapter.LogDebug("DeviceCapture", "Recv " + data.Length + " " + Encoding.UTF8.GetString(data));
+								}
+							}
+						}
+						catch (Exception e)
+						{
+							LogAdapter.LogError("DeviceCapture", e.ToString());
+						}
+					})
+					{
+						IsBackground = true, 
+						Name = "Capture thread for " + captureendpoint
+					};
+					captureThread.Start();
+				}
+
+				var captureHandle = _enableCapture ? captureSink.Handle() : IntPtr.Zero;
+
 			restart:
 				// this will block forever, hence it's running in a separate thread
-				var res = Native.Device.zmq_proxy(front.Handle(), back.Handle(), IntPtr.Zero);
-
+				var res = Native.Device.zmq_proxy(front.Handle(), back.Handle(), captureHandle);
 				if (res == Native.ErrorCode)
 				{
 					if (Native.LastError() == Native.EINTR) // unix interruption
@@ -96,6 +151,9 @@
 
 					// force disposal since these sockets were eterm'ed or worse
 					this.Dispose();
+
+					if (captureSink != null) captureSink.Dispose();
+					if (capReceiver != null) capReceiver.Dispose();
 
 					// this is expected
 					if (Native.LastError() == Native.ETERM) return;

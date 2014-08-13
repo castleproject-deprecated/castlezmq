@@ -15,14 +15,15 @@ namespace Castle.Zmq.Extensions
 	/// </summary>
 	public class Forwarder : Device
 	{
-		public Forwarder(IZmqSocket frontend, IZmqSocket backend) : base(frontend, backend)
+		public Forwarder(IZmqSocket frontend, IZmqSocket backend, bool enableCapture = false)
+			: base(frontend, backend, enableCapture)
 		{
 			if (frontend.SocketType != SocketType.XSub) throw new ArgumentException("Frontend must be a XSub");
 			if (backend.SocketType != SocketType.XPub) throw new ArgumentException("Backend must be a XPub");
 		}
 
-		public Forwarder(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint)
-			: base(ctx, frontEndEndpoint, backendEndpoint, SocketType.XSub, SocketType.XPub)
+		public Forwarder(IZmqContext ctx, string frontEndEndpoint, string backendEndpoint, bool enableCapture = false)
+			: base(ctx, frontEndEndpoint, backendEndpoint, SocketType.XSub, SocketType.XPub, enableCapture)
 		{
 		}
 
