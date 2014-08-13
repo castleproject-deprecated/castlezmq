@@ -76,7 +76,7 @@
 				if (!(this.Backend is Socket)) throw new InvalidOperationException("Backend instance is not a Socket");
 			}
 
-			Task.Factory.StartNew(() =>
+			var thread = new Thread(() =>
 			{
 				if (this._ownSockets)
 				{
@@ -90,19 +90,19 @@
 				StartFrontEnd();
 				StartBackEnd();
 
-				IZmqSocket captureSink, capReceiver;
-				captureSink = capReceiver = null;
+				IZmqSocket capReceiver;
+				IZmqSocket captureSink = capReceiver = null;
 
 				if (this._enableCapture)
 				{
-					Random Rnd = new Random((int)DateTime.Now.Ticks);
-					var captureendpoint = "inproc://capture" + Rnd.Next(0, Int32.MaxValue);
+					var rnd = new Random((int)DateTime.Now.Ticks);
+					
+					var captureendpoint = "inproc://capture" + rnd.Next(0, Int32.MaxValue);
 					captureSink = _ctx.Pair();
 					captureSink.Bind(captureendpoint);
 
 					capReceiver = _ctx.Pair();
 					capReceiver.Connect(captureendpoint);
-
 
 					var captureThread = new Thread(() =>
 					{
@@ -118,16 +118,14 @@
 								{
 									ev(data);
 								}
-
-								if (LogAdapter.LogEnabled)
-								{
-									LogAdapter.LogDebug("DeviceCapture", "Recv " + data.Length + " " + Encoding.UTF8.GetString(data));
-								}
 							}
 						}
 						catch (Exception e)
 						{
-							LogAdapter.LogError("DeviceCapture", e.ToString());
+							if (LogAdapter.LogEnabled)
+							{
+								LogAdapter.LogError("DeviceCapture", e.ToString());
+							}
 						}
 					})
 					{
@@ -167,7 +165,11 @@
 						LogAdapter.LogError(this.GetType().FullName, msg);
 					}
 				}
-			});
+			})
+			{
+				IsBackground = true
+			};
+			thread.Start();
 		}
 
 		protected virtual void StartFrontEnd()
