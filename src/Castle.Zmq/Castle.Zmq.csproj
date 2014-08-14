@@ -62,6 +62,8 @@
     <Compile Include="IZmqContext.cs" />
     <Compile Include="IZmqSocket.cs" />
     <Compile Include="Native\Native.cs" />
+    <Compile Include="ZmqError.cs" />
+    <Compile Include="ZmqErrorCode.cs" />
     <Compile Include="Polling.cs" />
     <Compile Include="Polling.PollItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

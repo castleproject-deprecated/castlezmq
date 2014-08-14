@@ -30,7 +30,11 @@ namespace Castle.Zmq.Extensions
 
 			for (int i = 0; i < _workers; i++)
 			{
-				ThreadPool.UnsafeQueueUserWorkItem(WorkerProc, null);
+				var t = new Thread(WorkerProc) { 
+					IsBackground = true, 
+					Name = "WorkerPoolThread_" + i 
+				};
+				t.Start();
 			}
 
 			base.Start();
@@ -66,7 +70,7 @@ namespace Castle.Zmq.Extensions
 					LogAdapter.LogError(this.GetType().FullName, e.ToString());
 				}
 
-				if (e.ZmqErrorCode != Native.ETERM) throw;
+				if (e.ZmqErrorCode != ZmqErrorCode.ETERM) throw;
 			}
 		}
 

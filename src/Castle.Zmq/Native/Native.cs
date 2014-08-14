@@ -25,12 +25,6 @@
 
 		#endregion
 
-		private const int HAUSNUM = 156384712;
-		public const int ETERM = HAUSNUM + 53;
-		public const int EINTR = 4;
-		public const int EAGAIN = 11;
-//		public const int ETERM = HAUSNUM + 53;
-
 		public const int ErrorCode = -1;
 
 		public static int LastError()
@@ -61,23 +55,6 @@
 			if (context == null)
 				throw new ZmqException(msg, error);
 			throw new ZmqException(msg + " in " + context + " | Error code: " + error, error);
-		}
-	}
-
-	public sealed class ZmqError
-	{
-		public ZmqError(int errorCode)
-		{
-			this.Error = errorCode;
-			this.Message = Native.LastErrorString(errorCode);
-		}
-
-		public int Error { get; private set; }
-		public string Message { get; private set; }
-
-		public override string ToString()
-		{
-			return this.Error + " - " + this.Message;
 		}
 	}
 }

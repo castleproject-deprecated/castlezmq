@@ -104,7 +104,7 @@
 				{
 					var error = Native.LastError();
 					
-					if (error != Native.EINTR) // Unix system interruption 
+					if (error != ZmqErrorCode.EINTR) // Unix system interruption 
 					{
 						Native.ThrowZmqError();
 					}

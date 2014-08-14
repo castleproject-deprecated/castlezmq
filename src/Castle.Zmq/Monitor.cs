@@ -141,7 +141,7 @@
 			}
 			catch (ZmqException ex)
 			{
-				if (ex.ZmqErrorCode != Native.ETERM)
+				if (ex.ZmqErrorCode != ZmqErrorCode.ETERM)
 				{
 					if (LogAdapter.LogEnabled)
 					{

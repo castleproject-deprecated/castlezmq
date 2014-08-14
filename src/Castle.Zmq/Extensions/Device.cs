@@ -142,7 +142,7 @@
 				var res = Native.Device.zmq_proxy(front.Handle(), back.Handle(), captureHandle);
 				if (res == Native.ErrorCode)
 				{
-					if (Native.LastError() == Native.EINTR) // unix interruption
+					if (Native.LastError() == ZmqErrorCode.EINTR) // unix interruption
 					{
 						goto restart;
 					}
@@ -154,7 +154,7 @@
 					if (capReceiver != null) capReceiver.Dispose();
 
 					// this is expected
-					if (Native.LastError() == Native.ETERM) return;
+					if (Native.LastError() == ZmqErrorCode.ETERM) return;
 					
 					// not expected
 					var msg = "Error on zmq_proxy: " + Native.LastErrorString();
