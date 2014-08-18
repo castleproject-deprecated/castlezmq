@@ -41,6 +41,7 @@
 		public ZmqError Error { get; internal set; }
 	}
 
+
 	public class Monitor : IDisposable
 	{
 		private static readonly Random Rnd = new Random((int)DateTime.Now.Ticks);
@@ -108,7 +109,7 @@
 				{
 					var binary = _pairSocket.Recv();
 
-					if (binary == null) continue;
+					if (binary == null || binary.Length == 0) continue;
 
 					var ev = (MonitorEvents) BitConverter.ToUInt16(binary, 0);
 					int val = 0;
