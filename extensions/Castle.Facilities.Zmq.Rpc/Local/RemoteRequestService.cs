@@ -38,8 +38,26 @@ namespace Castle.Facilities.Zmq.Rpc
 			{
 				ReqPoll = this._requestPoll
 			};
+
+			var watch = System.Diagnostics.Stopwatch.StartNew();
+			if (Castle.Zmq.LogAdapter.LogEnabled)
+			{
+				Castle.Zmq.LogAdapter.LogDebug(
+					"Castle.Facilities.Zmq.Rpc.RemoteRequestService", 
+					"About to send request for " + host + "-" + service + "-" + methodName);
+			}
 			
 			ResponseMessage response = request.Get();
+
+			watch.Stop();
+			if (Castle.Zmq.LogAdapter.LogEnabled)
+			{
+				Castle.Zmq.LogAdapter.LogDebug(
+					"Castle.Facilities.Zmq.Rpc.RemoteRequestService",
+					"Reply from " + host + "-" + service + "-" + methodName + 
+					" took " + watch.ElapsedMilliseconds + "ms (" + watch.Elapsed.TotalSeconds + "s). " + 
+					"Exception? " + (response.ExceptionInfo != null));
+			}
 
 			if (response.ExceptionInfo != null)
 			{
@@ -52,6 +70,8 @@ namespace Castle.Facilities.Zmq.Rpc
 			{
 				return _serializationStrategy.DeserializeResponseValue(response, retType);
 			}
+
+			
 
 			return null;
 		}

@@ -76,6 +76,15 @@
 		private ResponseMessage InternalDispatch(RequestMessage reqMessage)
 		{
 			ResponseMessage response = null;
+
+			var watch = System.Diagnostics.Stopwatch.StartNew();
+			if (Castle.Zmq.LogAdapter.LogEnabled)
+			{
+				Castle.Zmq.LogAdapter.LogDebug(
+					"Castle.Facilities.Zmq.Rpc.RemoteRequestListener",
+					"About to dispatch request for " + reqMessage.TargetService + "-" + reqMessage.TargetMethod);
+			}
+
 			try
 			{
 				var result =
@@ -93,6 +102,18 @@
 			catch (Exception ex)
 			{
 				response = Builder.BuildResponse(ex);
+			}
+			finally
+			{
+				watch.Stop();
+
+				if (Castle.Zmq.LogAdapter.LogEnabled)
+				{
+					Castle.Zmq.LogAdapter.LogDebug(
+						"Castle.Facilities.Zmq.Rpc.RemoteRequestListener",
+						"Dispatched request for " + reqMessage.TargetService + "-" + reqMessage.TargetMethod +
+						" took " + watch.ElapsedMilliseconds + "ms (" + watch.Elapsed.TotalSeconds + "s)");
+				}
 			}
 			return response;
 		}		
