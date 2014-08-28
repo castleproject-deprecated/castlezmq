@@ -22,6 +22,7 @@
 
 		public int Timeout { get; set; }
 
+
 		public T Get()
 		{
 			if (ReqPoll != null)
@@ -44,9 +45,9 @@
 			using (var socket = _context.Req())
 			{
 //				if (this.Timeout != Socket.InfiniteTimeout)
-//				{
+// 				{
 //					socket.SetOption(SocketOpt.RCVTIMEO, this.Timeout);
-//				}
+// 				}
 
 				socket.Connect(_endpoint);
 

@@ -32,14 +32,16 @@
 			if (topic == null) throw new ArgumentNullException("topic");
 			if (!_started) throw new InvalidOperationException("Cannot subscribe before starting it");
 
-			_socket.Subscribe(topic);
+			lock (_socket)
+				_socket.Subscribe(topic);
 		}
 		public void UnsubscribeFromTopic(string topic)
 		{
 			if (topic == null) throw new ArgumentNullException("topic");
 			if (!_started) throw new InvalidOperationException("Cannot unsubscribe before starting it");
 
-			_socket.Unsubscribe(topic);
+			lock (_socket)
+				_socket.Unsubscribe(topic);
 		}
 
 		public virtual void Start()
@@ -54,7 +56,7 @@
 			{
 				this._socket.Connect(this._endpoint);
 
-				this._worker = new Thread(OnRecvWorker)
+				this._worker = new Thread(OnRecvWorker) 
 				{
 					IsBackground = true
 				};

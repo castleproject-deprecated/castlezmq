@@ -65,6 +65,11 @@ namespace Castle.Zmq
 			};
 		}
 
+		/// <summary>
+		/// Socket being monitored
+		/// </summary>
+		public IZmqSocket Socket { get { return this._socket; } }
+
 		~MonitoredSocket()
 		{
 			this.Dispose();
@@ -72,6 +77,8 @@ namespace Castle.Zmq
 
 		public void Dispose()
 		{
+			GC.SuppressFinalize(this);
+
 			_monitor.Dispose();
 		}
 

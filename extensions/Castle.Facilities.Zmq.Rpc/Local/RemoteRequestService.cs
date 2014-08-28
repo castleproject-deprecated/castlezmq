@@ -46,34 +46,64 @@ namespace Castle.Facilities.Zmq.Rpc
 					"Castle.Facilities.Zmq.Rpc.RemoteRequestService", 
 					"About to send request for " + host + "-" + service + "-" + methodName);
 			}
-			
-			ResponseMessage response = request.Get();
 
-			watch.Stop();
-			if (Castle.Zmq.LogAdapter.LogEnabled)
+			var attempts = 0;
+			const int maxAttempts = 3;
+
+			ResponseMessage response = null;
+
+			while (attempts++ < maxAttempts)
 			{
-				Castle.Zmq.LogAdapter.LogDebug(
-					"Castle.Facilities.Zmq.Rpc.RemoteRequestService",
-					"Reply from " + host + "-" + service + "-" + methodName + 
-					" took " + watch.ElapsedMilliseconds + "ms (" + watch.Elapsed.TotalSeconds + "s). " + 
-					"Exception? " + (response.ExceptionInfo != null));
+//				request.Monitor = attempts > 1;
+
+				response = request.Get();
+
+				watch.Stop();
+				if (Castle.Zmq.LogAdapter.LogEnabled)
+				{
+					Castle.Zmq.LogAdapter.LogDebug(
+						"Castle.Facilities.Zmq.Rpc.RemoteRequestService",
+						"Reply from " + host + "-" + service + "-" + methodName +
+						" took " + watch.ElapsedMilliseconds + "ms (" + watch.Elapsed.TotalSeconds + "s). " +
+						"Exception? " + (response.ExceptionInfo != null));
+				}
+
+				if (response.ExceptionInfo != null)
+				{
+					if (response.ExceptionInfo.Typename == RemoteRequest.TimeoutTypename)
+					{
+						// our side (local) set a exception info just to inform us - the caller - about a timeout. 
+						// since that's the case, attempt to try again
+						continue;
+					}
+
+					// otherwise -- it's some other kind of error, and we should just fail fast
+					ThrowWithExceptionInfoData(response);
+				}
+
+				// all went fine
+
+				if (retType != typeof(void))
+				{
+					return _serializationStrategy.DeserializeResponseValue(response, retType);
+				}
+
+				return null;
 			}
 
 			if (response.ExceptionInfo != null)
 			{
-				var msg = "Remote server or invoker threw " + response.ExceptionInfo.Typename + " with message " +
-				          response.ExceptionInfo.Message;
-				throw new Exception(msg);
+				ThrowWithExceptionInfoData(response);
 			}
-
-			if (retType != typeof(void))
-			{
-				return _serializationStrategy.DeserializeResponseValue(response, retType);
-			}
-
-			
 
 			return null;
+		}
+
+		private static void ThrowWithExceptionInfoData(ResponseMessage response)
+		{
+			var msg = "Remote server or invoker threw " + response.ExceptionInfo.Typename + " with message " +
+			          response.ExceptionInfo.Message;
+			throw new Exception(msg);
 		}
 	}
 }

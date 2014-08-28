@@ -5,21 +5,30 @@ namespace Castle.Zmq.Extensions
 	using System.Collections.Generic;
 	using System.Linq;
 
+
 	/// <summary>
 	/// Mitigates potential SO socket creation/destruction 
 	/// limits (exhaustion) by keeping sockets open
 	/// </summary>
 	public class RequestPoll : IDisposable
 	{
+		class EndpointPoll
+		{
+			internal ConcurrentQueue<IZmqSocket> SocketsQueue = new ConcurrentQueue<IZmqSocket>();
+//			internal bool monitored;
+//			internal MonitoredSocket monitor;
+//			internal object locker = new object();
+		}
+
 		private readonly IZmqContext _context;
-		private readonly ConcurrentDictionary<string, ConcurrentQueue<IZmqSocket>> _endpoint2Sockets; 
+		private readonly ConcurrentDictionary<string, EndpointPoll> _endpoint2Sockets;
 		private readonly HashSet<IZmqSocket> _socketsInUse; 
 		private volatile bool _disposed;
 
 		public RequestPoll(IZmqContext context)
 		{
 			this._context = context;
-			this._endpoint2Sockets = new ConcurrentDictionary<string, ConcurrentQueue<IZmqSocket>>(StringComparer.InvariantCultureIgnoreCase);
+			this._endpoint2Sockets = new ConcurrentDictionary<string, EndpointPoll>(StringComparer.InvariantCultureIgnoreCase);
 			this._socketsInUse = new HashSet<IZmqSocket>(); 
 		}
 
@@ -33,12 +42,38 @@ namespace Castle.Zmq.Extensions
 			if (_disposed) throw new ObjectDisposedException("RequestPoll");
 			if (string.IsNullOrEmpty(endpoint)) throw new ArgumentNullException("endpoint");
 
-			var socketQueue = _endpoint2Sockets.GetOrAdd(endpoint, _ => new ConcurrentQueue<IZmqSocket>());
+			var endpointPoll = _endpoint2Sockets.GetOrAdd(endpoint, _ => new EndpointPoll());
+			var socketQueue = endpointPoll.SocketsQueue;
 
 			IZmqSocket socket;
 			if (!socketQueue.TryDequeue(out socket))
 			{
 				socket = this._context.CreateSocket(SocketType.Req);
+
+//				var isMonitoring = endpointPoll.monitored;
+//				if (!isMonitoring)
+//				{
+//					var locker = endpointPoll.locker;
+//					lock (locker)
+//					{
+//						isMonitoring = endpointPoll.monitored;
+//						if (!isMonitoring)
+//						{
+//							var monitor = new MonitoredSocket(_context, socket);
+//							
+//							endpointPoll.monitor = monitor;
+//							endpointPoll.monitored = true;
+//
+//							monitor.Error += (zmqSocket, events, arg3) => InvalidatePoll(endpoint, "Monitor: error  " + arg3.ToString() + " - " + events);
+//							monitor.Disconnected += (zmqSocket, events, arg3) => InvalidatePoll(endpoint, "Monitor: disconnected " + arg3 + " - " + events);
+//							monitor.Connected += (zmqSocket, events, arg3) =>
+//							{
+//								LogAdapter.LogDebug("RequestPoll", "Connected " + events + "  " + arg3);
+//							};
+//						}						
+//					}
+//				}
+
 				socket.Connect(endpoint);
 			}
 			else
@@ -62,18 +97,27 @@ namespace Castle.Zmq.Extensions
 			if (socket == null) throw new ArgumentNullException("socket");
 			if (string.IsNullOrEmpty(endpoint)) throw new ArgumentNullException("endpoint");
 
+			var endpointPoll = _endpoint2Sockets.GetOrAdd(endpoint, _ => new EndpointPoll());
+
 			if (_disposed || inError)
 			{
+//				if (endpointPoll.monitor != null && endpointPoll.monitor.Socket == socket)
+//				{
+//					endpointPoll.monitor.Dispose();
+//					endpointPoll.monitored = false;
+//				}
+
 				socket.Dispose();
-
-				if (inError) this.Untrack(socket);
-
-				return;
 			}
 
 			this.Untrack(socket);
 
-			var socketQueue = _endpoint2Sockets.GetOrAdd(endpoint, _ => new ConcurrentQueue<IZmqSocket>());
+			if (_disposed || inError)
+			{
+				return;
+			}
+
+			var socketQueue = endpointPoll.SocketsQueue;
 
 			// make available to next one
 			socketQueue.Enqueue(socket);
@@ -95,6 +139,31 @@ namespace Castle.Zmq.Extensions
 			}
 		}
 
+		private void InvalidatePoll(string name, string reason)
+		{
+			if (LogAdapter.LogEnabled)
+			{
+				LogAdapter.LogDebug("RequestPoll", "InvalidatePoll called. " + reason);
+			}
+
+			lock (_endpoint2Sockets)
+			{
+				EndpointPoll endpoint;
+				if (!_endpoint2Sockets.TryRemove(name, out endpoint)) return;
+
+//				if (endpoint.monitor != null)
+//				{
+//					endpoint.monitor.Dispose();
+//					endpoint.monitored = false;
+//					endpoint.monitor = null;
+//				}
+				foreach (var socket in endpoint.SocketsQueue.ToArray())
+				{
+					socket.Dispose();
+				}
+			}
+		}
+
 		private void InternalDispose(bool isDisposing)
 		{
 			if (_disposed) return;
@@ -107,11 +176,10 @@ namespace Castle.Zmq.Extensions
 			}
 
 			// dispose sockets on queues
-			var endpoints = this._endpoint2Sockets.ToArray();
+			var endpoints = this._endpoint2Sockets.Keys.ToArray();
 			foreach (var endpoint in endpoints)
-			foreach (var socket in endpoint.Value.ToArray())
 			{
-				socket.Dispose();
+				InvalidatePoll(endpoint, "Disposing");
 			}
 
 			IZmqSocket[] sockets;
