@@ -11,14 +11,18 @@
 	using Castle.Zmq.Rpc.Model;
 
 
-	public class RemoteRequestListener : IStartable
+	/// <summary>
+	/// This version does not use a WorkerPool to distribute 
+	/// worker (good for troubleshooting only)
+	/// </summary>
+	public class RemoteRequestListener2 : IStartable
 	{
 		private readonly IZmqSocket _reply;
 		private readonly string _endpoint;
 		private readonly LocalInvocationDispatcher _dispatcher;
 		private readonly SerializationStrategy _serializationStrategy;
 
-		public RemoteRequestListener(IZmqContext context, string endpoint, int workers,
+		public RemoteRequestListener2(IZmqContext context, string endpoint, int workers,
 			LocalInvocationDispatcher dispatcher,
 			SerializationStrategy serializationStrategy)
 		{
@@ -124,8 +128,12 @@
 	/// Deserializes the <see cref="RequestMessage"/>,
 	/// invokes the real method using the <see cref="LocalInvocationDispatcher"/>
 	/// and returns a <see cref="ResponseMessage"/> to the requester (Zmq.Req)
+	/// 
+	/// <para>
+	/// This version uses a WorkerPool to fairly distribute the incoming requests.
+	/// </para>
 	/// </summary>
-	public class RemoteRequestListener2  // : IStartable
+	public class RemoteRequestListener : IStartable
 	{
 		private static int localAddUseCounter = 1;
 
@@ -139,7 +147,7 @@
 
 		private readonly string _localEndpoint;
 
-		public RemoteRequestListener2(IZmqContext context, string endpoint, int workers, 
+		public RemoteRequestListener(IZmqContext context, string endpoint, int workers, 
 									 LocalInvocationDispatcher dispatcher, 
 									 SerializationStrategy serializationStrategy)
 		{
