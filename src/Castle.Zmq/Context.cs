@@ -8,6 +8,7 @@
 	using System.IO;
 	using System.IO.Compression;
 	using System.Linq;
+	using System.Threading;
 
 
 	/// <summary>
@@ -194,7 +195,24 @@
 				{
 					LogAdapter.LogError("Context", "Socket tracking: " + message);
 				}
-#endif 
+
+				var t = new System.Threading.Thread(() =>
+				{
+					Thread.Sleep(2000);
+
+					var message2 = 
+						this.GetTrackedSockets()
+							.Aggregate("", (prev, tuple) => prev + "Socket " + tuple.Item1.SocketType + " at " + tuple.Item2 + Environment.NewLine);
+
+					System.Diagnostics.Trace.TraceError("Socket tracking: " + message2);
+					System.Diagnostics.Debug.WriteLine("Socket tracking: " + message2);
+					if (LogAdapter.LogEnabled)
+					{
+						LogAdapter.LogError("Context", "**** STILL Hanging **** - Socket tracking: " + message2);
+					}
+				});
+				t.Start();
+#endif
 
 				var error = Native.Context.zmq_ctx_term(this._contextPtr);
 				if (error == Native.ErrorCode)
