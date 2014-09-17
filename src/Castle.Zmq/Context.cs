@@ -22,8 +22,18 @@
 
 		public const int DefaultIoThreads = 1;
 		public const int DefaultMaxSockets = 1024;
+		
+		/// <summary>
+		/// Fired when we are about to terminate the context
+		/// </summary>
+		public event Action Disposing;
 
-	    /// <summary>
+		/// <summary>
+		/// Called after we have successfully terminated the context
+		/// </summary>
+		public event Action Disposed;
+
+		/// <summary>
 		/// Creates a new context
 		/// </summary>
 		/// <param name="ioThreads">How many dedicated threds for IO operations</param>
@@ -183,6 +193,13 @@
 
 			if (this._contextPtr != IntPtr.Zero)
 			{
+				var ev = this.Disposing;
+				if (ev != null)
+				{
+					// Notifying of pre-context-termination
+					ev();
+				}
+
 				Native.Context.zmq_ctx_shutdown(this._contextPtr); // discard any error
 
 #if DEBUG
@@ -226,6 +243,13 @@
 					{
 						LogAdapter.LogError("Context", msg);
 					}
+				}
+
+				ev = this.Disposed;
+				if (ev != null)
+				{
+					// Notifying of post-context-termination
+					ev();
 				}
 			}
 		}

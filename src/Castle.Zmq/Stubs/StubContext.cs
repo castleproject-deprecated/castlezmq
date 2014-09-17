@@ -8,6 +8,9 @@
 		private readonly Func<SocketType, StubSocket> _creator = (type) => new StubSocket(type);
 		private bool _disposed;
 
+		public event Action Disposing;
+		public event Action Disposed;
+
 		public StubContext()
 		{
 			this.LastSocketCreatedByType = new Dictionary<SocketType, StubSocket>();
