@@ -15,9 +15,6 @@ namespace Castle.Zmq.Extensions
 		class EndpointPoll
 		{
 			internal ConcurrentQueue<IZmqSocket> SocketsQueue = new ConcurrentQueue<IZmqSocket>();
-//			internal bool monitored;
-//			internal MonitoredSocket monitor;
-//			internal object locker = new object();
 		}
 
 		private readonly IZmqContext _context;
@@ -29,7 +26,9 @@ namespace Castle.Zmq.Extensions
 		{
 			this._context = context;
 			this._endpoint2Sockets = new ConcurrentDictionary<string, EndpointPoll>(StringComparer.InvariantCultureIgnoreCase);
-			this._socketsInUse = new HashSet<IZmqSocket>(); 
+			this._socketsInUse = new HashSet<IZmqSocket>();
+
+			this._context.Disposing += OnZmqContextDisposing;
 		}
 
 		~RequestPoll()
@@ -49,30 +48,6 @@ namespace Castle.Zmq.Extensions
 			if (!socketQueue.TryDequeue(out socket))
 			{
 				socket = this._context.CreateSocket(SocketType.Req);
-
-//				var isMonitoring = endpointPoll.monitored;
-//				if (!isMonitoring)
-//				{
-//					var locker = endpointPoll.locker;
-//					lock (locker)
-//					{
-//						isMonitoring = endpointPoll.monitored;
-//						if (!isMonitoring)
-//						{
-//							var monitor = new MonitoredSocket(_context, socket);
-//							
-//							endpointPoll.monitor = monitor;
-//							endpointPoll.monitored = true;
-//
-//							monitor.Error += (zmqSocket, events, arg3) => InvalidatePoll(endpoint, "Monitor: error  " + arg3.ToString() + " - " + events);
-//							monitor.Disconnected += (zmqSocket, events, arg3) => InvalidatePoll(endpoint, "Monitor: disconnected " + arg3 + " - " + events);
-//							monitor.Connected += (zmqSocket, events, arg3) =>
-//							{
-//								LogAdapter.LogDebug("RequestPoll", "Connected " + events + "  " + arg3);
-//							};
-//						}						
-//					}
-//				}
 
 				socket.Connect(endpoint);
 			}
@@ -129,6 +104,11 @@ namespace Castle.Zmq.Extensions
 		public void Dispose()
 		{
 			InternalDispose(true);
+		}
+
+		protected virtual void OnZmqContextDisposing()
+		{
+			this.Dispose();
 		}
 
 		private void Untrack(IZmqSocket socket)

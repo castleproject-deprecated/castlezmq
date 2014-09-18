@@ -23,6 +23,7 @@
 			this._context = context;
 			this._endpoint = endpoint;
 			this._serializer = serializer;
+			this._context.Disposing += OnZmqContextDisposing;
 		}
 
 		/// <summary>
@@ -68,8 +69,6 @@
 				this._socket.Bind(this._endpoint);
 				this._started = true;
 			}
-
-			ObserveHealth();
 		}
 
 		public virtual void Stop()
@@ -83,7 +82,7 @@
 			}
 		}
 
-		public void Dispose()
+		public virtual void Dispose()
 		{
 			if (_disposed) return;
 
@@ -103,33 +102,9 @@
 			}
 		}
 
-		private void ObserveHealth()
+		protected virtual void OnZmqContextDisposing()
 		{
-			// For proper cleanup
-			Task.Factory.StartNew(() =>
-			{
-				var pooling = new Polling(PollingEvents.SendReady, this._socket);
-
-				try
-				{
-					while (this._started)
-					{
-						// since under normal circunstance a SendReady 
-						// is always ready, we force a wait
-						Thread.Sleep(1000);
-
-						// this should b
-						pooling.PollForever();
-					}
-				}
-				catch (Exception e)
-				{
-					// the expected error (eterm) 
-					// will cause this socket to be unusable. 
-					// thus we force the disposal
-					this.Dispose();
-				}
-			});
+			this.Dispose();
 		}
 
 		private void EnsureNotDisposed()

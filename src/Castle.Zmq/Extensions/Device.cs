@@ -53,6 +53,8 @@
 
 			this.FrontEndEndpoint = frontEndEndpoint;
 			this.BackendEndpoint = backendEndpoint;
+
+			this._ctx.Disposing += OnZmqContextDisposing;
 		}
 
 		public string FrontEndEndpoint { get; private set; }
@@ -212,6 +214,11 @@
 				if (this.Frontend != null) this.Frontend.Dispose();
 				if (this.Backend != null) this.Backend.Dispose();
 			}
+		}
+
+		protected virtual void OnZmqContextDisposing()
+		{
+			this.Dispose();
 		}
 
 		internal void EnsureNotDisposed()

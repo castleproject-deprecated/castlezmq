@@ -23,6 +23,8 @@
 			this._context = context;
 			this._endpoint = endpoint;
 			this._deserializer = deserializer;
+
+			this._context.Disposing += OnZmqContextDisposing;
 		}
 
 		protected abstract void OnReceived(string topic, T message);
@@ -35,6 +37,7 @@
 			lock (_socket)
 				_socket.Subscribe(topic);
 		}
+
 		public void UnsubscribeFromTopic(string topic)
 		{
 			if (topic == null) throw new ArgumentNullException("topic");
@@ -93,6 +96,11 @@
 			}
 
 			_disposed = true;
+		}
+
+		protected virtual void OnZmqContextDisposing()
+		{
+			this.Dispose();
 		}
 
 		private void OnRecvWorker()
