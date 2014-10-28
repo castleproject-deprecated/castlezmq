@@ -135,7 +135,8 @@
 				{
 					var error = Native.LastError();
 
-					if (error == ZmqErrorCode.EAGAIN || error == ZmqErrorCode.EINTR) goto again;
+					if (error == ZmqErrorCode.EAGAIN) return null;
+					if (error == ZmqErrorCode.EINTR) goto again;
 
 					if (LogAdapter.LogEnabled)
 					{

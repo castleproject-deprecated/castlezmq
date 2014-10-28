@@ -112,5 +112,31 @@
 				}
 			}
 		}
+
+		[Test]
+		public void receive_nowait_blocking()
+		{
+			using (var pubSocket = base.Context.CreateSocket(SocketType.Pub))
+			{
+				pubSocket.Bind("tcp://0.0.0.0:90012");
+
+				using (var subSocket = base.Context.CreateSocket(SocketType.Sub))
+				{
+					subSocket.SetOption(SocketOpt.RCVTIMEO, 100);
+					subSocket.Connect("tcp://127.0.0.1:90012");
+					subSocket.Subscribe("topicX");
+
+					Thread.Sleep(100);
+
+					pubSocket.Send("topic", null, hasMoreToSend: true);
+					pubSocket.Send("data");
+
+					Thread.Sleep(100);
+
+					var topic = subSocket.RecvString();
+					Assert.IsNull(topic);
+				}
+			}
+		}
 	}
 }
