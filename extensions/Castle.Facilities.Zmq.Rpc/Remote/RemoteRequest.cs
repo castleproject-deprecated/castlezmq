@@ -24,7 +24,6 @@
 			this.Timeout = 30 * 1000;
 		}
 
-
 		protected override void SendRequest(IZmqSocket socket)
 		{
 			var buffer = _serializationStrategy.SerializeRequest(_requestMessage);

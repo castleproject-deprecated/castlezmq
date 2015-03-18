@@ -5,7 +5,7 @@ namespace Castle.Facilities.Zmq.Rpc.Internal
 	using System.Collections.Generic;
 	using System.Reflection;
 
-	internal static class ReflectionUtils
+    public static class ReflectionUtils
 	{
 		/// <summary>
 		/// true if type is array, IEnumerable, etc

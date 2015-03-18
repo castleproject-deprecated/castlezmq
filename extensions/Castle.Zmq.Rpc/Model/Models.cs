@@ -3,6 +3,7 @@
 	using ProtoBuf;
 
 	[ProtoContract(SkipConstructor = true)]
+    [System.Diagnostics.DebuggerDisplay("ParamTuple {TypeName} {SerializedValue.Length}")]
 	public class ParamTuple
 	{
 		public ParamTuple()

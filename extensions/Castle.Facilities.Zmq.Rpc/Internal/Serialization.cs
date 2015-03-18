@@ -7,7 +7,7 @@
 	using Castle.Zmq.Rpc.Model;
 
 
-	internal static class Serialization
+	public static class Serialization
 	{
 		private static readonly byte[] EmptyBuffer = new byte[0];
 

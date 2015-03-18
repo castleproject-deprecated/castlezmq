@@ -9,7 +9,7 @@ namespace Castle.Facilities.Zmq.Rpc.Internal
 	/// Builds some complex objects, often involving 
 	/// serialization logic and optimizations
 	/// </summary>
-	internal static class Builder
+    public static class Builder
 	{
 		public static ResponseMessage BuildResponse(Tuple<object, Type> result)
 		{
