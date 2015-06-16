@@ -59,6 +59,7 @@
 					throw;
 				}
 			}
+			this.SetOption(SocketOpt.LINGER, 0);
 		}
 
 		~Socket()
@@ -260,7 +261,10 @@
 
 			_disposed = true;
 
-			TryCancelLinger();
+			if (isDispose)
+			{
+				TryCancelLinger();
+			}
 
 			var res = Native.Socket.zmq_close(this.SocketPtr);
 			if (res == Native.ErrorCode)
