@@ -31,9 +31,14 @@
 			// gets a pointer to the buffer in zmq_msg_t
 			var arrayPtr = Native.MsgFrame.zmq_msg_data(_msgPtr);
 			var buffer = new byte[size];
-
-			// copy the bytes
-			Marshal.Copy(arrayPtr, buffer, 0, size);
+			unsafe
+			{
+				fixed(byte* b = &buffer[0])
+				{
+					// copy the bytes
+					Marshal.Copy(arrayPtr, buffer, 0, size);
+				}	
+			}
 			
 			return buffer;
 		}

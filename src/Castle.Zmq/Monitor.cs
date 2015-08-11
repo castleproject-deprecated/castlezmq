@@ -73,11 +73,19 @@
 
 			this._monitorName = monitorName;
 
+			int res = 0;
+
 			// Creates a inproc socket pair
-			var res = Native.Monitor.zmq_socket_monitor(socket.Handle(), monitorName, (int)events);
-			if (res == Native.ErrorCode)
+			unsafe
 			{
-				Native.ThrowZmqError("Monitor");
+				fixed(char* s = monitorName)
+				{
+					res = Native.Monitor.zmq_socket_monitor(socket.Handle(), monitorName, (int)events);
+					if (res == Native.ErrorCode)
+					{
+						Native.ThrowZmqError("Monitor");
+					}
+				}
 			}
 
 			// Connects to the newly created socket pair
